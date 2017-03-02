@@ -1,0 +1,36 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build-debug": "mkdirp dist && browserify app.js -t babelify --outfile dist/app.js",
+    "watch:js": "mkdirp dist && watchify app.js -t babelify --outfile dist/app.js -dv",
+    "serve": "live-server ./",
+    "uglify": "uglifyjs dist/app.js -o dist/app.min.js",
+    "build": "npm run clean && npm run build-debug && npm run uglify",
+    "deepstream": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm-run-all --parallel deepstream watch:js serve"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "deepstream.io": "^2.1.3",
+    "@cycle/dom": "^10.0.0",
+    "@cycle/xstream-run": "^3.0.4",
+    "xstream": "^5.3.6"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.22.0",
+    "babelify": "^7.3.0",
+    "browserify": "^14.1.0",
+    "live-server": "^1.2.0",
+    "mkdirp": "^0.5.1",
+    "npm-run-all": "^4.0.2",
+    "rimraf": "^2.6.1",
+    "uglifyjs": "^2.4.10",
+    "watchify": "^3.9.0"
+  }
+}
