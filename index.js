@@ -1,4 +1,5 @@
 import xs from 'xstream'
+import {adapt} from '@cycle/run/lib/adapt'
 import deepstream from 'deepstream.io-client-js'
 import {EventEmitter} from 'events'
 
@@ -259,7 +260,7 @@ export function makeDeepstreamDriver(url, auth={}, options={}) {
       stop: () => {}
     })
     
-    return effect$
+    return adapt(effect$)
   }
 
   return deepstreamDriver
