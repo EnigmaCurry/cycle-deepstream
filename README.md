@@ -24,6 +24,7 @@ Deepstream API Implementation:
   - Records:
     - [x] record.subscribe
        - once subscribed, will emit events:
+         - [x] record.change
          - [x] record.discard
          - [x] record.delete
          - [x] record.error
@@ -40,6 +41,7 @@ Deepstream API Implementation:
   - Lists:
     - [x] list.subscribe
       - once subscribed, will emit events:
+         - [x] list.change
          - [x] list.discard
          - [x] list.delete
          - [x] list.error
