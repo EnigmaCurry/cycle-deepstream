@@ -13,7 +13,7 @@ Run Demo
     git clone https://github.com/EnigmaCurry/cycle-deepstream.git
     cd cycle-deepstream
     npm install
-    cd example
+    cd examples/simple
     npm install
     npm run start
 

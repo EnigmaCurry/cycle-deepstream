@@ -10,7 +10,7 @@
     "serve": "live-server ./",
     "uglify": "uglifyjs dist/app.js -o dist/app.min.js",
     "build": "npm run clean && npm run build-debug && npm run uglify",
-    "deepstream": "node server.js",
+    "deepstream": "deepstream start -c deepstream/config.yml",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm-run-all --parallel deepstream watch:js serve"
   },

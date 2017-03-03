@@ -1,7 +1,7 @@
 import xs from 'xstream'
 import {run} from '@cycle/run'
 import { div, span, h1, hr, br, a, input, makeDOMDriver } from '@cycle/dom'
-import {makeDeepstreamDriver} from '../index'
+import {makeDeepstreamDriver} from '../../index'
 
 function main(sources) {
 
@@ -43,5 +43,5 @@ function main(sources) {
 
 run(main, {
   DOM: makeDOMDriver('#app'),
-  DEEP: makeDeepstreamDriver('localhost:6020')
+  DEEP: makeDeepstreamDriver('localhost:6020', {username:'anonymous', password:'anonymous'})
 })
