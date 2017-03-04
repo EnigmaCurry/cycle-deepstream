@@ -1,7 +1,7 @@
 import xs from 'xstream'
 import {run} from '@cycle/run'
 import { div, span, h1, hr, br, a, input, makeDOMDriver } from '@cycle/dom'
-import {makeDeepstreamDriver} from '../../index'
+import {makeDeepstreamDriver} from '../../../index'
 
 function main(sources) {
 

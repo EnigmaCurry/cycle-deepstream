@@ -4,15 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf dist",
-    "build-debug": "mkdirp dist && browserify app.js -t babelify --outfile dist/app.js",
-    "watch:js": "mkdirp dist && watchify app.js -t babelify --outfile dist/app.js -dv",
-    "serve": "live-server ./",
-    "uglify": "uglifyjs dist/app.js -o dist/app.min.js",
-    "build": "npm run clean && npm run build-debug && npm run uglify",
     "deepstream": "deepstream start -c deepstream/config.yml",
+    "serve": "webpack-dev-server --open",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm-run-all --parallel deepstream watch:js serve"
+    "start": "npm-run-all --parallel deepstream serve"
   },
   "author": "",
   "license": "MIT",
@@ -23,14 +18,14 @@
     "xstream": "^10.3.0"
   },
   "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
     "babel-preset-es2015": "^6.22.0",
-    "babelify": "^7.3.0",
-    "browserify": "^14.1.0",
-    "live-server": "^1.2.0",
+    "copy-webpack-plugin": "^4.0.1",
     "mkdirp": "^0.5.1",
     "npm-run-all": "^4.0.2",
     "rimraf": "^2.6.1",
-    "uglifyjs": "^2.4.10",
-    "watchify": "^3.9.0"
+    "webpack": "^2.2.1",
+    "webpack-dev-server": "^2.4.1"
   }
 }
