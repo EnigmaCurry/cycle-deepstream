@@ -43,5 +43,5 @@ function main(sources) {
 
 run(main, {
   DOM: makeDOMDriver('#app'),
-  DEEP: makeDeepstreamDriver('localhost:6020', {username:'anonymous', password:'anonymous'})
+  DEEP: makeDeepstreamDriver('localhost:6020')
 })
