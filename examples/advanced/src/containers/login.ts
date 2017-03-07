@@ -1,8 +1,10 @@
 import xs from 'xstream'
-import { div, span, input } from '@cycle/dom'
+import { div, span, a, input } from '@cycle/dom'
 
 function view() {
-  return div("Login here now!")
+  return div(
+    a(".login", { attrs: { href: "/" } }, "Click here to go to the home page")
+  )
 }
 
 export function Login(sources) {

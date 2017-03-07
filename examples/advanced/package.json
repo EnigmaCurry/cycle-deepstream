@@ -12,12 +12,12 @@
   "license": "MIT",
   "dependencies": {
     "@cycle/dom": "^15.2.0",
-    "@cycle/run": "^1.0.0",
+    "@cycle/history": "^6.0.0",
+    "@cycle/run": "^3.0.0",
     "deepstream.io": "^2.1.3",
     "dom-events": "^0.1.1",
     "global-object": "^1.0.0",
-    "history": "^3.0.0",
-    "path-to-regexp": "^1.5.3",
+    "path-to-regexp": "^1.7.0",
     "xstream": "^10.3.0"
   },
   "devDependencies": {
