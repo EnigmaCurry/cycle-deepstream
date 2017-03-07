@@ -1,0 +1,21 @@
+{
+  "name": "cycle-deepstream-example-comprehensive",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Ryan McGuire <ryan@enigmacurry.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/EnigmaCurry/cycle-deepstream",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "emoji-rain": "^1.0.4"
+  }
+}

@@ -4,7 +4,9 @@
   "description": "A Cycle.js driver for deepstream.io",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "simple": "cd examples/simple && npm install && npm run start",
+    "comprehensive": "cd examples/comprehensive && npm install && npm run start"
   },
   "browserify": {
     "transform": [

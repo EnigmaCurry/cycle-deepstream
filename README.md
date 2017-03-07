@@ -9,13 +9,18 @@ Status: *experimental* - not released on npm yet.
 
 Run Demo
 ----------
+Get the code:
 
     git clone https://github.com/EnigmaCurry/cycle-deepstream.git
     cd cycle-deepstream
-    npm install
-    cd examples/simple
-    npm install
-    npm run start
+    
+Run the comprehensive demo:
+
+    npm run comprehensive
+
+Or run the simple example:
+
+    npm run simple
 
 Features
 ----------
