@@ -19,9 +19,9 @@ export function replace(pathname: string): ReplaceHistoryInput {
 export function go(amount: number): GoHistoryInput {
   return <GoHistoryInput>{ type: 'go', amount }
 }
-export function goBack(pathname: string): GoBackHistoryInput {
+export function goBack(): GoBackHistoryInput {
   return <GoBackHistoryInput>{ type: 'goBack' }
 }
-export function goForward(pathname: string): GoForwardHistoryInput {
+export function goForward(): GoForwardHistoryInput {
   return <GoForwardHistoryInput>{ type: 'goForward' }
 }
