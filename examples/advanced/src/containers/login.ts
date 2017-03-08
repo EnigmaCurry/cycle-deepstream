@@ -1,6 +1,6 @@
 import xs from 'xstream'
 import { Sources, Sinks } from '../types'
-import * as navigation from '../navigation'
+import * as navigation from '../actions/navigation'
 import { div, span, button, input } from '@cycle/dom'
 
 export function Login(sources: Sources): Sinks {
