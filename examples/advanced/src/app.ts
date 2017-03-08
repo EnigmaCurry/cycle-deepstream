@@ -27,7 +27,6 @@ function main(sources: Sources): Sinks {
   // Stream of current URL path
   const path$ = history$
     .map((location: Location) => location.pathname)
-    .compose(dropRepeats())
 
   // Create a container and output it's DOM stream
   // Filter the DOM stream so that it only shows for the correct URL pattern:
@@ -50,8 +49,5 @@ function main(sources: Sources): Sinks {
 // Create our main Cycle drivers and run the main:
 run(main, {
   DOM: makeDOMDriver(document.body),
-  history$: captureClicks(makeHistoryDriver({
-    basename: '/', //base URL of the app
-    forceRefresh: false, //No refreshing between pages
-  }))
+  history$: captureClicks(makeHistoryDriver())
 })
