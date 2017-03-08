@@ -44,8 +44,8 @@ function main(sources: Sources): Sinks {
   const path$ = history$
     .map((location: Location) => location.pathname)
 
-  // Create a map of route pattern to instantiated container object -
-  // Create each container, but don't hook up any of their sinks yet:
+  // Create each container and map it to it's route pattern - 
+  // Don't hook up any of the sinks yet:
   const containers = routes
     .reduce((acc, route) => (
       { ...acc, [route.pattern]: isolate(route.container)(sources) }
