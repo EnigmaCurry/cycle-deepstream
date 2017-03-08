@@ -3,20 +3,20 @@ import dropRepeats from 'xstream/extra/dropRepeats';
 import { run } from '@cycle/run'
 import { makeDOMDriver, div } from '@cycle/dom'
 import { captureClicks, makeHistoryDriver } from '@cycle/history'
-import { ReplaceHistoryInput } from '@cycle/history'
+import isolate from '@cycle/isolate'
 import { Location } from 'history'
 import { Login } from './containers/login'
 import { Home } from './containers/home'
 import { Sources, Sinks, Route } from './types'
-import * as pathToRegexp from 'path-to-regexp'
+import * as makePathRegex from 'path-to-regexp'
 
 // Import our deepstream driver from the parent project folder:
 import { makeDeepstreamDriver } from '../../../index'
 
 // Application URL route to component mapping:
 const routes: Array<Route> = [
-  { name: 'index', component: Home, pattern: '/', },
-  { name: 'login', component: Login, pattern: '/login' }
+  { container: Home, pattern: '/' },
+  { container: Login, pattern: '/login' }
 ]
 
 // Application main function -
@@ -28,21 +28,40 @@ function main(sources: Sources): Sinks {
   const path$ = history$
     .map((location: Location) => location.pathname)
 
-  // Create a container and output it's DOM stream
-  // Filter the DOM stream so that it only shows for the correct URL pattern:
-  const createRouteStream = (route: Route) => {
-    const routePattern = pathToRegexp(route.pattern)
-    return xs.combine(xs.of(route), path$, route.component(sources).DOM)
-      .filter(([route, location, dom]) => routePattern.test(location))
+  // Create a map of route pattern to instantiated container object -
+  // Create each container, but don't hook up any of their sinks yet:
+  const containers = routes
+    .reduce((acc, route) => (
+      { ...acc, [route.pattern]: isolate(route.container)(sources) }
+    ), {})
+
+  // A Route DOM stream is a combined stream of the following:
+  //  - The configured Route object (static)
+  //  - The current browser Location from the path$
+  //  - The most recent DOM update from the container
+  // This stream is filtered to only emit when the Location matches the Route.
+  const createRouteDOMStream = (route: Route) => {
+    const routeRegex = makePathRegex(route.pattern)
+    const container = containers[route.pattern]
+    return xs.combine(xs.of(route), path$, container.DOM)
+      .filter(([route, location, dom]) => routeRegex.test(location))
   }
 
-  // Construct the main page DOM from the defined routes:
-  const vdom$ = xs.merge.apply(null, routes.map(
-    route => createRouteStream(route)))
+  // Create merged history stream from all the containers:
+  const containerHistories = Object.keys(containers)
+    .map(pattern => containers[pattern].history$)
+  const navigation$ = xs.merge.apply(null, containerHistories)
+    .debug(console.log)
+
+  //Create the main DOM stream as the combined stream of all container
+  //route streams. If the route changes, the whole dom is swapped.
+  const routeStreams = routes.map(route => createRouteDOMStream(route))
+  const vdom$ = xs.merge.apply(null, routeStreams)
     .map(([route, location, dom]) => dom)
 
   return {
     DOM: vdom$,
+    history$: navigation$
   }
 }
 

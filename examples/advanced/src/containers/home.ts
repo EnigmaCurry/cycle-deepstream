@@ -5,16 +5,18 @@ import { Sources, Sinks } from '../types'
 
 function view() {
   return div([
-    a(".login", { attrs: { href: "http://localhost:3002/login" } }, "Default click handler")
+    a('.login', { attrs: { href: '/login' } }, 'Default click handler')
   ])
 }
 
-export function Home(sources: Sources) {
+export function Home(sources: Sources): Sinks {
   const { DOM, history$ } = sources
 
   const vdom$ = xs.of(view())
+  const navigation$ = xs.never()
 
   return {
-    DOM: vdom$
+    DOM: vdom$,
+    history$: navigation$
   }
 }

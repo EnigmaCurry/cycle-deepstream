@@ -8,12 +8,12 @@ export type Sources = {
 }
 
 export type Sinks = {
-  DOM: Stream<VNode>
+  DOM: Stream<VNode>,
+  history$: Stream<HistoryInput>
 }
 
 export type Route = {
-  name: string,
-  component: any,
+  container: (sources: Sources) => Sinks,
   pattern: string
 }
 
