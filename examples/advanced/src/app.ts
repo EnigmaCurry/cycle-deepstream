@@ -15,9 +15,8 @@
 //    specified in the routes array.
 
 import xs from 'xstream'
-import dropRepeats from 'xstream/extra/dropRepeats';
 import { run } from '@cycle/run'
-import { makeDOMDriver, div } from '@cycle/dom'
+import { makeDOMDriver } from '@cycle/dom'
 import { captureClicks, makeHistoryDriver } from '@cycle/history'
 import isolate from '@cycle/isolate'
 import { Location } from 'history'
