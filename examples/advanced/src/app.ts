@@ -1,3 +1,19 @@
+// app.ts
+// The main entry point for this example application.
+//  - It's job is to create containers for different routes,
+//    pass them sources, and hook up their sinks.
+//  - main() is our main entry point
+//  - run() invokes Cycle.js on our main function.
+//  - Pages of our app are contained in seperate components
+//    found in the containers/ subdirectory.
+//  - Each container component is isolated from each other
+//    with @cycle/isolate. (Actions bound to HTML tag class names
+//    won't leak to other components with the same class names.)
+//  - Each container follows the Sources => Sinks interface
+//    defined in types.ts, including DOM, history$, etc.
+//  - URLs are mapped to these component containers with patterns
+//    specified in the routes array.
+
 import xs from 'xstream'
 import dropRepeats from 'xstream/extra/dropRepeats';
 import { run } from '@cycle/run'
@@ -22,6 +38,7 @@ const routes: Array<Route> = [
 // Application main function -
 // Main routing to individual components based on the current URL.
 function main(sources: Sources): Sinks {
+  // Receive Source streams from our cycle drivers:
   const { DOM, history$ } = sources
 
   // Stream of current URL path
@@ -48,9 +65,9 @@ function main(sources: Sources): Sinks {
   }
 
   // Create merged history stream from all the containers:
-  const containerHistories = Object.keys(containers)
+  const containerNavigationStreams = Object.keys(containers)
     .map(pattern => containers[pattern].history$)
-  const navigation$ = xs.merge.apply(null, containerHistories)
+  const navigation$ = xs.merge.apply(null, containerNavigationStreams)
     .debug(console.log)
 
   //Create the main DOM stream as the combined stream of all container
@@ -59,6 +76,7 @@ function main(sources: Sources): Sinks {
   const vdom$ = xs.merge.apply(null, routeStreams)
     .map(([route, location, dom]) => dom)
 
+  // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
     DOM: vdom$,
     history$: navigation$
@@ -67,6 +85,8 @@ function main(sources: Sources): Sinks {
 
 // Create our main Cycle drivers and run the main:
 run(main, {
+  // @cycle/dom driver
   DOM: makeDOMDriver(document.body),
+  // @cycle/history driver
   history$: captureClicks(makeHistoryDriver())
 })
