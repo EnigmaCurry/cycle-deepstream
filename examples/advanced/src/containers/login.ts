@@ -1,6 +1,6 @@
 import xs from 'xstream'
 import { Sources, Sinks } from '../types'
-import { PushHistoryInput } from '@cycle/history/lib'
+import * as navigation from '../navigation'
 import { div, span, button, input } from '@cycle/dom'
 
 export function Login(sources: Sources): Sinks {
@@ -9,7 +9,7 @@ export function Login(sources: Sources): Sinks {
   const navigation$ = DOM
     .select('.login')
     .events('click')
-    .map(ev => (<PushHistoryInput>{ type: 'push', pathname: '/' }))
+    .map(ev => navigation.push('/'))
 
   const vdom$ = xs.of(
     div(
