@@ -14,10 +14,10 @@
 //  - URLs are mapped to these component containers with patterns
 //    specified in the routes array.
 
-import xs from 'xstream'
+import xs, { Stream } from 'xstream'
 import { run } from '@cycle/run'
 import { makeDOMDriver } from '@cycle/dom'
-import { captureClicks, makeHistoryDriver } from '@cycle/history'
+import { captureClicks, makeHistoryDriver, HistoryInput } from '@cycle/history'
 import isolate from '@cycle/isolate'
 import { Location } from 'history'
 import { Login } from './containers/login'
@@ -40,13 +40,13 @@ function main(sources: Sources): Sinks {
   // Receive Source streams from our cycle drivers:
   const { DOM, history$ } = sources
 
-  // Stream of current URL path
+  // Stream that observes the current URL path
   const path$ = history$
     .map((location: Location) => location.pathname)
 
   // Create each container and map it to it's route pattern - 
   // Don't hook up any of the sinks yet:
-  const containers = routes
+  const containers: { [pattern: string]: Sinks } = routes
     .reduce((acc, route) => (
       { ...acc, [route.pattern]: isolate(route.container)(sources) }
     ), {})
@@ -64,8 +64,9 @@ function main(sources: Sources): Sinks {
   }
 
   // Create merged history stream from all the containers:
-  const containerNavigationStreams = Object.keys(containers)
-    .map(pattern => containers[pattern].history$)
+  const containerNavigationStreams: Array<Stream<HistoryInput>> =
+    Object.keys(containers)
+      .map(pattern => containers[pattern].history$)
   const navigation$ = xs.merge.apply(null, containerNavigationStreams)
     .debug(console.log)
 
