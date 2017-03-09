@@ -26,6 +26,15 @@ Features
 ----------
 
 Deepstream API Implementation:
+  - Client
+    - [x] login
+    - [x] logout
+    - events:
+      - [x] onConnectionChange
+      - [x] client.error
+      - [x] login.success
+      - [x] login.failure
+      - [x] logout
   - Records:
     - [x] record.subscribe
        - once subscribed, will emit events:

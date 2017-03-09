@@ -89,7 +89,9 @@ maxMessageSize: 1048576
 
 #Authentication
 auth:
-  type: none
+  type: file
+  options:
+    path: ./users.yml
   
 #   # reading users and passwords from a file
 #   type: file

@@ -3,12 +3,16 @@ import {adapt} from '@cycle/run/lib/adapt'
 import deepstream from 'deepstream.io-client-js'
 import {EventEmitter} from 'events'
 
-export function makeDeepstreamDriver(url, auth={}, options={}) {
-  const client = window.ds = deepstream(url, options).login(auth)
+export function makeDeepstreamDriver(url, options={}) {
 
-  function deepstreamDriver(action$, streamAdapter) {
-    const cachedRecords = {}
-    const cachedLists = {}
+  if (url === undefined) {
+    throw new Error('must specify deepstream host:PORT')
+  }
+  
+  return function deepstreamDriver(action$, streamAdapter) {
+    let client
+    let cachedRecords = {}
+    let cachedLists = {}
     
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
@@ -38,6 +42,48 @@ export function makeDeepstreamDriver(url, auth={}, options={}) {
       })
     }
 
+    const login$ = action$.filter(intent => intent.action === 'login')
+    const loginListener = login$.addListener({
+      next: intent => {
+        if (client !== undefined) {
+          client.close()
+        }
+        // Delete caches:
+        cachedRecords = {}
+        cachedLists = {}
+        client = deepstream(url).login(intent.auth, (success, data) => {
+          if (success) {
+            emit({event:'login.success', data})
+          } else {
+            emit({event:'login.failure', data})
+          }
+        })
+        client.on('error', (error) => {
+          emit({event: 'client.error', error})
+        })
+        client.on('connectionStateChanged', (state) => {
+          emit({event: 'connection.state', state})
+        })
+      },
+      error: () => {},
+      complete: () => {}
+    })
+
+    const logout$ = action$.filter(intent => intent.action === 'logout')
+    const logoutListener = logout$.addListener({
+      next: intent => {
+        // Delete caches:
+        cachedRecords = {}
+        cachedLists = {}
+        if (client !== undefined) {
+          client.close()
+        }
+        emit({event:'logout'})
+      },
+      error: () => {},
+      complete: () => {}
+    })
+    
     const recordSubscription$ = action$.filter(intent => intent.action === 'record.subscribe'
                                                && intent.name != undefined)
     const recordSubscriptionListener = recordSubscription$.addListener({
@@ -262,6 +308,4 @@ export function makeDeepstreamDriver(url, auth={}, options={}) {
     
     return adapt(effect$)
   }
-
-  return deepstreamDriver
 }

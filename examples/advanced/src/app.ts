@@ -23,6 +23,7 @@ import { Location } from 'history'
 import { Login } from './containers/login'
 import { Home } from './containers/home'
 import { Sources, Sinks, Route } from './types'
+import * as navigation from './actions/navigation'
 import * as makePathRegex from 'path-to-regexp'
 
 // Import our deepstream driver from the parent project folder:
@@ -38,7 +39,7 @@ const routes: Array<Route> = [
 // Main routing to individual components based on the current URL.
 function main(sources: Sources): Sinks {
   // Receive Source streams from our cycle drivers:
-  const { DOM, history$ } = sources
+  const { DOM, history$, deep$ } = sources
 
   // Stream that observes the current URL path
   const path$ = history$
@@ -63,12 +64,12 @@ function main(sources: Sources): Sinks {
       .filter(([route, location, dom]) => routeRegex.test(location))
   }
 
-  // Create merged history stream from all the containers:
-  const containerNavigationStreams: Array<Stream<HistoryInput>> =
-    Object.keys(containers)
-      .map(pattern => containers[pattern].history$)
-  const navigation$ = xs.merge.apply(null, containerNavigationStreams)
-    .debug(console.log)
+  // Merge common sink types together into one stream:
+  const createMergedSinks = (sink: string): Stream<any> => {
+    const containerStreams = Object.keys(containers)
+      .map(pattern => containers[pattern][sink])
+    return xs.merge.apply(null, containerStreams)
+  }
 
   //Create the main DOM stream as the combined stream of all container
   //route streams. If the route changes, the whole dom is swapped.
@@ -76,10 +77,17 @@ function main(sources: Sources): Sinks {
   const vdom$ = xs.merge.apply(null, routeStreams)
     .map(([route, location, dom]) => dom)
 
+  // On deepstream logout, return to the login page:
+  const logout$ = deep$
+    .startWith({ event: 'logout' })
+    .filter(effect => effect.event === 'logout')
+    .map(effect => navigation.push("/login"))
+
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
     DOM: vdom$,
-    history$: navigation$
+    history$: xs.merge(createMergedSinks('history$'), logout$),
+    deep$: createMergedSinks('deep$')
   }
 }
 
@@ -88,5 +96,6 @@ run(main, {
   // @cycle/dom driver
   DOM: makeDOMDriver(document.body),
   // @cycle/history driver
-  history$: captureClicks(makeHistoryDriver())
+  history$: captureClicks(makeHistoryDriver()),
+  deep$: makeDeepstreamDriver('localhost:6020')
 })
