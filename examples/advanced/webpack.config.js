@@ -32,7 +32,7 @@ module.exports = {
         // web components
         // handles html files. <link rel="import" href="path.html"> and import 'path.html';
         test: /\.html$/, 
-        loader: 'ts-loader!wc-loader'
+        loader: 'wc-loader'
       },
     ]
   }

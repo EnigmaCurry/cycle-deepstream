@@ -16,12 +16,13 @@
 
 import xs, { Stream } from 'xstream'
 import { run } from '@cycle/run'
-import { makeDOMDriver } from '@cycle/dom'
+import { makeDOMDriver, div } from '@cycle/dom'
 import { captureClicks, makeHistoryDriver, HistoryInput } from '@cycle/history'
 import isolate from '@cycle/isolate'
 import { Location } from 'history'
 import { Login } from './containers/login'
 import { Home } from './containers/home'
+import { Layout } from './components/layout'
 import { Sources, Sinks, Route } from './types'
 import * as navigation from './actions/navigation'
 import * as makePathRegex from 'path-to-regexp'
@@ -74,8 +75,12 @@ function main(sources: Sources): Sinks {
   //Create the main DOM stream as the combined stream of all container
   //route streams. If the route changes, the whole dom is swapped.
   const routeStreams = routes.map(route => createRouteDOMStream(route))
-  const vdom$ = xs.merge.apply(null, routeStreams)
+  const routeDOM$ = xs.merge.apply(null, routeStreams)
     .map(([route, location, dom]) => dom)
+
+  //Layout composes our main UI, it takes the routeDOM$ as a source,
+  //and wraps it with the static contents that should be on every page.
+  const layout$ = Layout({ ...sources, DOM: routeDOM$ }).DOM
 
   // On deepstream logout, return to the login page:
   const logout$ = deep$
@@ -85,7 +90,7 @@ function main(sources: Sources): Sinks {
 
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
-    DOM: vdom$,
+    DOM: layout$,
     history$: xs.merge(createMergedSinks('history$'), logout$),
     deep$: createMergedSinks('deep$')
   }
@@ -94,7 +99,7 @@ function main(sources: Sources): Sinks {
 // Create our main Cycle drivers and run the main:
 run(main, {
   // @cycle/dom driver
-  DOM: makeDOMDriver(document.body),
+  DOM: makeDOMDriver('#app'),
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
   deep$: makeDeepstreamDriver('localhost:6020')

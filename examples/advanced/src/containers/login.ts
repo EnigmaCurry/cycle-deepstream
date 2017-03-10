@@ -12,14 +12,17 @@ const ringo = require('file-loader!../../images/ringo.jpg')
 function view() {
   const width = 150
   const userImg = (name, url) =>
-    img('.user', {
+    div('.user', {
       attrs: {
         name: name,
-        src: url,
-        width: width
       },
       style: {
-        padding: '10px'
+        display: 'inline-block',
+        padding: '10px',
+        width: '100px',
+        height: '100px',
+        background: `url(${url}) no-repeat center`,
+        backgroundSize: '100px 100px'
       }
     })
 
@@ -42,13 +45,14 @@ export function Login(sources: Sources): Sinks {
   const userClick$ = DOM
     .select('.user')
     .events('click')
-    .map(ev => ev.target['name'])
+    .map(ev => (<HTMLElement>ev.target).getAttribute('name'))
 
   const login$ = userClick$
     .map(name => deepstream.login(name, name))
 
   const navigation$ = deep$
     .filter(effect => effect.event === 'login.success')
+    //TODO: Go back to referer. goBack() doesn't quite work, lets be explicit.
     .map(ev => navigation.push('/'))
 
   const vdom$ = xs.of(view())
