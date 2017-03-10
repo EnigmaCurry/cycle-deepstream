@@ -22,10 +22,12 @@ import isolate from '@cycle/isolate'
 import { Location } from 'history'
 import { Login } from './containers/login'
 import { Home } from './containers/home'
-import { Layout } from './components/layout'
 import { Sources, Sinks, Route } from './types'
 import * as navigation from './actions/navigation'
 import * as makePathRegex from 'path-to-regexp'
+
+// Import the main web component for our app via wc-loader:
+const appWebComponent = require('../x-app.html')
 
 // Import our deepstream driver from the parent project folder:
 import { makeDeepstreamDriver } from '../../../index'
@@ -78,19 +80,22 @@ function main(sources: Sources): Sinks {
   const routeDOM$ = xs.merge.apply(null, routeStreams)
     .map(([route, location, dom]) => dom)
 
-  //Layout composes our main UI, it takes the routeDOM$ as a source,
-  //and wraps it with the static contents that should be on every page.
-  const layout$ = Layout({ ...sources, DOM: routeDOM$ }).DOM
-
   // On deepstream logout, return to the login page:
   const logout$ = deep$
     .startWith({ event: 'logout' })
     .filter(effect => effect.event === 'logout')
     .map(effect => navigation.push("/login"))
 
+  // Side bar drawer content:
+  const appDrawerDOM$ = xs.of(div('drop your drawers!'))
+  // App header bar content:
+  const appHeaderDOM$ = xs.of(div({ attrs: { mainTitle: '' } }, 'Beatle Chat'))
+
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
-    DOM: layout$,
+    DOM: routeDOM$,
+    drawer$: appDrawerDOM$,
+    header$: appHeaderDOM$,
     history$: xs.merge(createMergedSinks('history$'), logout$),
     deep$: createMergedSinks('deep$')
   }
@@ -98,8 +103,19 @@ function main(sources: Sources): Sinks {
 
 // Create our main Cycle drivers and run the main:
 run(main, {
-  // @cycle/dom driver
-  DOM: makeDOMDriver('#app'),
+  // @cycle/dom drivers
+  // Normally, a cycle.js app has one DOM driver.
+  // We split this into three seperate ones: DOM, header$, and drawer$.
+  //  - DOM is for the main scrollable area of the page
+  //  - header$ is for the application header area
+  //  - drawer$ is for the slideout drawer area
+  // We do this because we are using the app-layout web component from
+  // Polymer. Its idiosyncrasies require setting up it's DOM first,
+  // before cycle/snabbdom runs, and then we attach to the three divs
+  // created in ../x-app.html
+  DOM: makeDOMDriver('#app-content'),
+  header$: makeDOMDriver('#app-header'),
+  drawer$: makeDOMDriver('#app-drawer'),
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
   deep$: makeDeepstreamDriver('localhost:6020')

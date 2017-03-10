@@ -4,14 +4,18 @@ import { HistoryInput } from '@cycle/history/lib'
 
 export type Sources = {
   DOM: DOMSource,
+  header$: DOMSource,
+  drawer$: DOMSource,
   history$: Stream<HistoryInput>,
   deep$: Stream<any>
 }
 
 export type Sinks = {
   DOM: Stream<VNode>,
+  deep$: Stream<any>,
   history$: Stream<HistoryInput>,
-  deep$: Stream<any>
+  header$?: Stream<VNode>,
+  drawer$?: Stream<VNode>,
 }
 
 export type Route = {
