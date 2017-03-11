@@ -4,6 +4,7 @@ john:
     groups:
       - beatles
   clientData:
+    userid: john
     name: John
 paul:
   password: paul
@@ -11,6 +12,7 @@ paul:
     groups:
       - beatles
   clientData:
+    userid: paul
     name: Paul
 george:
   password: george
@@ -18,6 +20,7 @@ george:
     groups:
       - beatles
   clientData:
+    userid: george
     name: George
 ringo:
   password: ringo
@@ -25,4 +28,5 @@ ringo:
     groups:
       - beatles
   clientData:
+    userid: ringo
     name: Ringo

@@ -29,7 +29,7 @@ function view() {
   return div('.outer', { style: { width: "100%" } },
     div('.login', { style: { width: "100%", margin: "0 auto", textAlign: "center" } },
       [
-        h1("Click your favorite Beatle to login:"),
+        h1("Click your favorite Beatle to sign in:"),
         userImg('john', john),
         userImg('paul', paul),
         br(),

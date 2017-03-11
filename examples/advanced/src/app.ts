@@ -20,17 +20,16 @@ import { makeDOMDriver, div } from '@cycle/dom'
 import { captureClicks, makeHistoryDriver, HistoryInput } from '@cycle/history'
 import isolate from '@cycle/isolate'
 import { Location } from 'history'
-import { Login } from './containers/login'
-import { Home } from './containers/home'
-import { Sources, Sinks, Route } from './types'
+import { Login, Home, AppDrawer } from './containers'
+import { MainSources, Sources, Sinks, MainSinks, Route } from './types'
 import * as navigation from './actions/navigation'
 import * as makePathRegex from 'path-to-regexp'
 
-// Import the main web component for our app via wc-loader:
-const appWebComponent = require('../x-app.html')
-
 // Import our deepstream driver from the parent project folder:
 import { makeDeepstreamDriver } from '../../../index'
+
+// Import the main web component for our app via wc-loader:
+require('../x-app.html')
 
 // Application URL route to component mapping:
 const routes: Array<Route> = [
@@ -40,9 +39,9 @@ const routes: Array<Route> = [
 
 // Application main function -
 // Main routing to individual components based on the current URL.
-function main(sources: Sources): Sinks {
+function main(sources: MainSources): MainSinks {
   // Receive Source streams from our cycle drivers:
-  const { DOM, history$, deep$ } = sources
+  const { DOM, history$, deep$, drawer$ } = sources
 
   // Stream that observes the current URL path
   const path$ = history$
@@ -87,23 +86,23 @@ function main(sources: Sources): Sinks {
     .map(effect => navigation.push("/login"))
 
   // Side bar drawer content:
-  const appDrawerDOM$ = xs.of(div('drop your drawers!'))
+  const appDrawer = isolate(AppDrawer)({ sources, deep$, DOM: drawer$ })
   // App header bar content:
   const appHeaderDOM$ = xs.of(div({ attrs: { mainTitle: '' } }, 'Beatle Chat'))
 
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
     DOM: routeDOM$,
-    drawer$: appDrawerDOM$,
+    drawer$: appDrawer.DOM,
     header$: appHeaderDOM$,
     history$: xs.merge(createMergedSinks('history$'), logout$),
-    deep$: createMergedSinks('deep$')
+    deep$: xs.merge(appDrawer.deep$, createMergedSinks('deep$'))
   }
 }
 
 // Create our main Cycle drivers and run the main:
 run(main, {
-  // @cycle/dom drivers
+  // @cycle/dom drivers -
   // Normally, a cycle.js app has one DOM driver.
   // We split this into three seperate ones: DOM, header$, and drawer$.
   //  - DOM is for the main scrollable area of the page
@@ -112,7 +111,7 @@ run(main, {
   // We do this because we are using the app-layout web component from
   // Polymer. Its idiosyncrasies require setting up it's DOM first,
   // before cycle/snabbdom runs, and then we attach to the three divs
-  // created in ../x-app.html
+  // created in ../x-app.html. 
   DOM: makeDOMDriver('#app-content'),
   header$: makeDOMDriver('#app-header'),
   drawer$: makeDOMDriver('#app-drawer'),

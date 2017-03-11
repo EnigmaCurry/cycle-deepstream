@@ -22,18 +22,22 @@ module.exports = {
     extensions: ['.ts','.js']
   },
   module: {
-    loaders: [
-      {
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
-        loader: 'ts-loader'
-      },
-      {
-        // web components
-        // handles html files. <link rel="import" href="path.html"> and import 'path.html';
-        test: /\.html$/, 
-        loader: 'wc-loader'
-      },
-    ]
+    rules: [{
+      test: /\.scss$/,
+      use: [{
+        loader: "style-loader" // creates style nodes from JS strings
+      }, {
+        loader: "css-loader" // translates CSS into CommonJS
+      }, {
+        loader: "sass-loader" // compiles Sass to CSS
+      }]
+    },{ 
+      test: /\.tsx?$/,
+      exclude: /node_modules/,
+      loader: 'ts-loader'
+    }, {
+      test: /\.html$/,
+      loader: 'wc-loader'
+    }]
   }
 }
