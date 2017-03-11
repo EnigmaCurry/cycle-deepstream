@@ -1,6 +1,8 @@
 cycle-deepstream
 =====================
 
+[![Join the chat at https://gitter.im/EnigmaCurry/cycle-deepstream](https://badges.gitter.im/EnigmaCurry/cycle-deepstream.svg)](https://gitter.im/EnigmaCurry/cycle-deepstream?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A [Cycle.js](https://cycle.js.org/) driver for [deepstream.io](https://deepstream.io)
 
 Status: *experimental* - not released on npm yet.
