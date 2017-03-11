@@ -118,5 +118,5 @@ run(main, {
   drawer$: makeDOMDriver('#app-drawer'),
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
-  deep$: makeDeepstreamDriver('localhost:6020')
+  deep$: makeDeepstreamDriver(`${window.location.hostname}:6020`)
 })

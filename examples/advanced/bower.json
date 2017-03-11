@@ -19,6 +19,7 @@
     "app-layout": "PolymerElements/app-layout#^0.10.7",
     "paper-icon-button": "^1.1.4",
     "iron-icons": "^1.2.0",
-    "paper-button": "^1.0.14"
+    "paper-button": "^1.0.14",
+    "paper-fab": "^1.2.1"
   }
 }

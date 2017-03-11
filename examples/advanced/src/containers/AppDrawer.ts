@@ -60,14 +60,20 @@ function view(userData = null) {
     // SIDE EFFECT: Turn off forceNarrow mode:
     appDrawerLayout.forceNarrow = false
     return div('.app-drawer-content', [
+      div([
+        h('h1.center', `Hey ${userData.name}`),
+        div([
+          h('img.avatar', { attrs: { src: userImages[userData.userid] } }),
+          h('paper-button#drawer-sign-in.sign-in.button.profile', {
+            attrs: { raised: '' },
+            hook: hooks
+          }, 'sign out'),
+          h('paper-button#drawer-settings.button.profile', {
+            attrs: { raised: '' },
+            hook: hooks
+          }, 'settings')]),
+      ]),
       div('.center', [
-        h('h1', `Hey ${userData.name}`),
-        h('img.avatar', { attrs: { src: userImages[userData.userid] } }),
-        h('br'),
-        h('paper-button#drawer-sign-in.sign-in.button.green', {
-          attrs: { raised: '' },
-          hook: hooks
-        }, 'sign out'),
         h('hr'),
         h('span', randomGreeting(userData.name)),
         h('hr'),
@@ -80,7 +86,7 @@ function view(userData = null) {
     return div('.app-drawer-content', [
       div('.center', [
         h('h1', "Don't you like the Beatles?"),
-        h('paper-button#drawer-sign-in.sign-in.button.green', {
+        h('paper-button#drawer-sign-in.sign-in.button', {
           attrs: { raised: '' },
           hook: hooks
         }, 'sign in already')

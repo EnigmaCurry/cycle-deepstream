@@ -8,7 +8,8 @@ function view(userData) {
 
   if (userData) {
     return div([
-      h('h2.center', `Here's what's new, ${userData.name}`)
+      h('h2.center', `Here's what's new, ${userData.name}`),
+      h('paper-fab', { attrs: { icon: 'create' } }),
     ])
   } else {
     return div('')
