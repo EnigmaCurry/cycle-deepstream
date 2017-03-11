@@ -2,6 +2,7 @@ import xs from 'xstream'
 import { h, div, br, span, a, button, input } from '@cycle/dom'
 import { PushHistoryInput } from '@cycle/history/lib'
 import * as deepstream from '../actions/deepstream'
+import { Location } from 'history'
 import { Sources, Sinks } from '../types'
 
 function view(userData) {

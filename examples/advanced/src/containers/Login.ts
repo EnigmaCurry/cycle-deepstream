@@ -3,6 +3,7 @@ import { Sources, Sinks } from '../types'
 import * as navigation from '../actions/navigation'
 import * as deepstream from '../actions/deepstream'
 import { div, h1, br, img } from '@cycle/dom'
+import { Location } from 'history'
 
 const john = require('file-loader!../../images/john.jpg')
 const paul = require('file-loader!../../images/paul.jpg')

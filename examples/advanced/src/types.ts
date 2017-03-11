@@ -11,15 +11,16 @@ export type Sources = {
 
 // Sink types for all sub containers/components:
 export type Sinks = {
-  DOM?: Stream<VNode>,
-  deep$?: Stream<any>,
-  history$?: Stream<HistoryInput>
+  DOM: Stream<VNode>,
+  deep$: Stream<any>,
+  history$: Stream<HistoryInput>
 }
 
 export type MainSources = {
   DOM: DOMSource,
   history$: Stream<HistoryInput>,
   deep$: Stream<any>,
+  title$: Stream<null>,
   header$: DOMSource,
   drawer$: DOMSource,
 }
@@ -30,12 +31,14 @@ export type MainSinks = {
   deep$: Stream<any>,
   history$: Stream<HistoryInput>,
   header$: Stream<VNode>,
-  drawer$: Stream<VNode>
+  drawer$: Stream<VNode>,
+  title$: Stream<string>
 }
 
 export type Route = {
   container: (sources: Sources) => Sinks,
-  pattern: string
+  pattern: string,
+  title: string
 }
 
 

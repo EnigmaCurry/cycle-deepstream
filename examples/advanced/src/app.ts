@@ -16,7 +16,8 @@
 
 import xs, { Stream } from 'xstream'
 import { run } from '@cycle/run'
-import { makeDOMDriver, div } from '@cycle/dom'
+import { makeDOMDriver, h } from '@cycle/dom'
+import { makeTitleDriver } from './drivers/title'
 import { captureClicks, makeHistoryDriver, HistoryInput } from '@cycle/history'
 import isolate from '@cycle/isolate'
 import { Location } from 'history'
@@ -32,10 +33,12 @@ import { makeDeepstreamDriver } from '../../../index'
 // Import the main web component for our app via wc-loader:
 require('../x-app.html')
 
+export const appTitle = 'Beatle Chat'
+
 // Application URL route to component mapping:
 const routes: Array<Route> = [
-  { container: Home, pattern: '/' },
-  { container: Login, pattern: '/login' }
+  { container: Home, pattern: '/', title: 'Home' },
+  { container: Login, pattern: '/login', title: 'Login' }
 ]
 
 // Application main function -
@@ -76,8 +79,9 @@ function main(sources: MainSources): MainSinks {
 
   //Create the main DOM stream as the combined stream of all container
   //route streams. If the route changes, the whole dom is swapped.
-  const routeStreams = routes.map(route => createRouteDOMStream(route))
-  const routeDOM$ = xs.merge.apply(null, routeStreams)
+  const routeStreams = xs.merge.apply(
+    null, routes.map(route => createRouteDOMStream(route)))
+  const routeDOM$ = routeStreams
     .map(([route, location, dom]) => dom)
 
   // On deepstream logout, return to the login page:
@@ -86,16 +90,22 @@ function main(sources: MainSources): MainSinks {
     .filter(effect => effect.event === 'logout')
     .map(effect => navigation.push("/login"))
 
+  // Page title:
+  const title$ = routeStreams
+    .map(([route, location, dom]) => `${route.title}`)
+
   // Side bar drawer content:
   const appDrawer = isolate(AppDrawer)({ sources, deep$, DOM: drawer$ })
   // App header bar content:
-  const appHeaderDOM$ = xs.of(div({ attrs: { mainTitle: '' } }, 'Beatle Chat'))
+  const appHeaderDOM$ = title$
+    .map(title => h('div', { attrs: { mainTitle: '' } }, title))
 
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
     DOM: routeDOM$,
     drawer$: appDrawer.DOM,
     header$: appHeaderDOM$,
+    title$: title$,
     history$: xs.merge(createMergedSinks('history$'), logout$),
     deep$: xs.merge(appDrawer.deep$, createMergedSinks('deep$'))
   }
@@ -105,7 +115,7 @@ function main(sources: MainSources): MainSinks {
 run(main, {
   // @cycle/dom drivers -
   // Normally, a cycle.js app has one DOM driver.
-  // We split this into three seperate ones: DOM, header$, and drawer$.
+  // We split this into a few seperate ones: DOM, header$, drawer$
   //  - DOM is for the main scrollable area of the page
   //  - header$ is for the application header area
   //  - drawer$ is for the slideout drawer area
@@ -116,7 +126,10 @@ run(main, {
   DOM: makeDOMDriver('#app-content'),
   header$: makeDOMDriver('#app-header'),
   drawer$: makeDOMDriver('#app-drawer'),
+  // title driver:
+  title$: makeTitleDriver(document.querySelector('title'), `${appTitle} - `),
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
+  // cycle-deepstream driver
   deep$: makeDeepstreamDriver(`${window.location.hostname}:6020`)
 })
