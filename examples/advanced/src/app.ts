@@ -24,6 +24,7 @@ import { Login, Home, AppDrawer } from './containers'
 import { MainSources, Sources, Sinks, MainSinks, Route } from './types'
 import * as navigation from './actions/navigation'
 import * as makePathRegex from 'path-to-regexp'
+import '../styles/app.scss'
 
 // Import our deepstream driver from the parent project folder:
 import { makeDeepstreamDriver } from '../../../index'

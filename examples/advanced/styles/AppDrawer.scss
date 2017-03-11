@@ -1,0 +1,26 @@
+#contentContainer.app-drawer {
+    color: #fff;
+    background-color: #263238 !important;
+    margin-right: 1em;
+}
+
+.app-drawer-content {
+    .button {
+        margin-top: 0.75em;
+        margin-bottom: 0.75em;
+        background-color: #78909C;
+        color: #fff;
+    }
+
+    .avatar {
+        width: 100px;
+    }
+
+    h1 {
+        margin-bottom: 0.25em;
+    }
+
+    hr {
+        width: 90%;
+    }
+}

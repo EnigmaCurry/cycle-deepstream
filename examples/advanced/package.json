@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "deepstream": "deepstream start -c deepstream/config.yml",
-    "serve": "webpack-dev-server --open",
+    "serve": "webpack-dev-server --host 0.0.0.0 --open",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm install && bower install && npm-run-all --parallel deepstream serve"
   },
