@@ -2,24 +2,42 @@ import { Stream } from 'xstream'
 import { DOMSource, VNode } from '@cycle/dom/lib'
 import { HistoryInput } from '@cycle/history/lib'
 
+export type UserData = {
+  userid: string,
+  name: string
+}
+
+export type DeepstreamRequest = {
+  action: string,
+  name?: string
+}
+
+export type DeepstreamEvent = {
+  event: string,
+  name: string,
+  data?: any
+}
+
 // Sources that all components receive:
 export type Sources = {
   DOM: DOMSource,
+  user$: Stream<UserData>,
   history$: Stream<HistoryInput>,
-  deep$: Stream<any>
+  deep$: Stream<DeepstreamEvent>,
+  props$: Stream<any>
 }
 
 // Sink types for all sub containers/components:
 export type Sinks = {
   DOM: Stream<VNode>,
-  deep$: Stream<any>,
+  deep$: Stream<DeepstreamRequest>,
   history$: Stream<HistoryInput>
 }
 
 export type MainSources = {
   DOM: DOMSource,
   history$: Stream<HistoryInput>,
-  deep$: Stream<any>,
+  deep$: Stream<DeepstreamEvent>,
   title$: Stream<null>,
   header$: DOMSource,
   drawer$: DOMSource,
@@ -28,7 +46,7 @@ export type MainSources = {
 // Sink type for the main application
 export type MainSinks = {
   DOM: Stream<VNode>,
-  deep$: Stream<any>,
+  deep$: Stream<DeepstreamRequest>,
   history$: Stream<HistoryInput>,
   header$: Stream<VNode>,
   drawer$: Stream<VNode>,

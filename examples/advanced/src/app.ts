@@ -51,11 +51,30 @@ function main(sources: MainSources): MainSinks {
   const path$ = history$
     .map((location: Location) => location.pathname)
 
+  // Logged in user state:
+  const user$ = xs.merge(
+    // null when the user is logged out.
+    // userData object when logged in (deepstream clientData from users.yml.)
+    deep$
+      .filter(effect => effect.event === 'logout' ||
+        effect.event === 'login.failure')
+      .mapTo(null),
+    deep$
+      .filter(effect => effect.event === 'login.success')
+      .map(effect => effect.data))
+    .startWith(null)
+    .remember()
+
+  // On deepstream logout, return to the login page:
+  const logout$ = user$
+    .filter(userData => userData === null)
+    .map(effect => navigation.replace("/login"))
+
   // Create each container and map it to it's route pattern - 
   // Don't hook up any of the sinks yet:
   const containers: { [pattern: string]: Sinks } = routes
     .reduce((acc, route) => (
-      { ...acc, [route.pattern]: isolate(route.container)(sources) }
+      { ...acc, [route.pattern]: isolate(route.container)({ ...sources, user$ }) }
     ), {})
 
   // A Route DOM stream is a combined stream of the following:
@@ -83,12 +102,6 @@ function main(sources: MainSources): MainSinks {
     null, routes.map(route => createRouteDOMStream(route)))
   const routeDOM$ = routeStreams
     .map(([route, location, dom]) => dom)
-
-  // On deepstream logout, return to the login page:
-  const logout$ = deep$
-    .startWith({ event: 'logout' })
-    .filter(effect => effect.event === 'logout')
-    .map(effect => navigation.push("/login"))
 
   // Page title:
   const title$ = routeStreams

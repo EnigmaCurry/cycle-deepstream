@@ -4,7 +4,6 @@ import deepstream from 'deepstream.io-client-js'
 import {EventEmitter} from 'events'
 
 export function makeDeepstreamDriver(url, options={}) {
-
   if (url === undefined) {
     throw new Error('must specify deepstream host:PORT')
   }
@@ -16,9 +15,13 @@ export function makeDeepstreamDriver(url, options={}) {
     
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
-    const emit = (data) => events.emit('deepstream-event', data)
+    const emit = (data) => {
+      console.debug(`deepstream: ${JSON.stringify(data)}`)
+      events.emit('deepstream-event', data)
+    }
     
     function getRecord(name) {
+      console.debug(`deepstream getRecord(${name})`)
       return new Promise((resolve, reject) => {
         const record = cachedRecords[name] === undefined ?
               client.record.getRecord(name) : cachedRecords[name]
@@ -31,6 +34,7 @@ export function makeDeepstreamDriver(url, options={}) {
     }
 
     function getList(name) {
+      console.debug(`deepstream getList(${name})`)
       return new Promise((resolve, reject) => {
         const list = cachedLists[name] === undefined ?
               client.record.getList(name) : cachedList[name]
@@ -51,7 +55,7 @@ export function makeDeepstreamDriver(url, options={}) {
         // Delete caches:
         cachedRecords = {}
         cachedLists = {}
-        client = deepstream(url).login(intent.auth, (success, data) => {
+        client = window.ds = deepstream(url).login(intent.auth, (success, data) => {
           if (success) {
             emit({event:'login.success', data})
           } else {
@@ -88,6 +92,7 @@ export function makeDeepstreamDriver(url, options={}) {
                                                && intent.name != undefined)
     const recordSubscriptionListener = recordSubscription$.addListener({
       next: intent => {
+        console.log("deepstream:", intent.action, intent.name)
         getRecord(intent.name).then(record => {
           record.subscribe(data => {
             emit({event:'record.change', name:record.name, data:data})

@@ -31,12 +31,13 @@ function view(userData = null) {
       `Love me do, ${name}.`,
       `Stop my mind from wandering, ${name}!`,
       `A four of fish and finger pies.`,
-      `${name}, don't you know? We all live in a yello submarine!`,
+      `${name}, don't you know? We all live in a yellow submarine!`,
       `Where do they all belong, ${name}?`,
       `${name} got the bill and Rita paid it.`,
       `Do you want to know a secret, ${name}?`,
       `${name}, let it be, let it be.`,
       `Alright, alright, ${name}.`,
+      `Don't let me down.`,
       `There will be a show tonight on trampoline.`,
       `Baby take a chance with me.`,
       `We'd like to thank you once again.`,
@@ -57,6 +58,7 @@ function view(userData = null) {
 
   const appDrawerLayout = (<any>document.querySelector('app-drawer-layout'))
   if (userData) {
+    // User logged in - profile text:
     // SIDE EFFECT: Turn off forceNarrow mode:
     appDrawerLayout.forceNarrow = false
     return div('.app-drawer-content', [
@@ -80,6 +82,7 @@ function view(userData = null) {
       ])
     ])
   } else {
+    // Not logged in - Sign in text
     // SIDE EFFECT: Force app to narrow mode if we aren't logged in.
     // This effectively hides the redundant login message.
     appDrawerLayout.forceNarrow = true
