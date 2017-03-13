@@ -10,10 +10,9 @@ import { Post } from '../containers'
 export function Home(sources: Sources): Sinks {
   const { DOM, history$, deep$, user$ } = sources
 
-  // Instantiate the post listing once the user is logged in:
+  // Rerender the post listing when a user logs in:
   const postListing$ = user$
     .filter(userData => userData !== null)
-    .take(1)
     .map(userData => isolate(Post)(
       { ...sources, props$: xs.of({ id: 'main', expandChildren: 1 }) }))
 
@@ -21,22 +20,15 @@ export function Home(sources: Sources): Sinks {
     .map(post => post.DOM)
     .flatten()
 
-  const logout$ = DOM
-    .select('.logout')
-    .events('click')
-    .map(ev => deepstream.logout())
-
+  // Connect Post.deep$ to Home.deep$ to allow it to fetch data and
+  // receive events:
   const postRequest$ = <Stream<DeepstreamRequest>>postListing$
     .map(post => post.deep$)
     .flatten()
 
-  const request$ = xs.merge(logout$, postRequest$)
-
-  const navigation$ = xs.never()
-
   return {
     DOM: vdom$,
-    history$: navigation$,
-    deep$: request$
+    history$: xs.never(),
+    deep$: postRequest$
   }
 }

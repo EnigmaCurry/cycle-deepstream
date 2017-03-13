@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "clean": "rimraf dist",
+    "dist": "npm run clean && NODE_ENV=production webpack",
     "deepstream": "deepstream start -c deepstream/config.yml",
     "serve": "webpack-dev-server --host 0.0.0.0 --open",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -39,6 +41,7 @@
     "typescript": "^2.2.1",
     "wc-loader": "^1.1.1",
     "webpack": "^2.2.1",
-    "webpack-dev-server": "^2.4.1"
+    "webpack-dev-server": "^2.4.1",
+    "webpack-split-by-path": "^2.0.0"
   }
 }

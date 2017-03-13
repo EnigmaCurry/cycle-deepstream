@@ -1,7 +1,7 @@
 import xs from 'xstream'
 import { Sources, Sinks } from '../types'
 import * as navigation from '../actions/navigation'
-import * as deepstream from '../actions/deepstream'
+import * as ds from '../actions/deepstream'
 import { div, h1, br, img } from '@cycle/dom'
 import { Location } from 'history'
 
@@ -49,7 +49,7 @@ export function Login(sources: Sources): Sinks {
     .map(ev => (<HTMLElement>ev.target).getAttribute('name'))
 
   const login$ = userClick$
-    .map(name => deepstream.login(name, name))
+    .map(name => ds.login({ username: name, password: name }))
 
   const navigation$ = deep$
     .filter(effect => effect.event === 'login.success')
