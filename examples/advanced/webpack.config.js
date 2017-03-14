@@ -1,5 +1,5 @@
 const SplitByPathPlugin = require('webpack-split-by-path')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 const FileSystem = require("fs");
 const path = require('path')
 
@@ -23,9 +23,6 @@ module.exports = {
     port: 3002
   },
   plugins: [
-    new CopyWebpackPlugin([
-      { from: 'index.html' }
-    ]),
     new SplitByPathPlugin([
       {
         name: 'vendor',
@@ -40,29 +37,12 @@ module.exports = {
         path: path.join(__dirname, 'bower_components')
       }
     ], {
-      manifest: 'vendor'
+      manifest: 'app-manifest'
     }),
-    // Inject script tag into index.html
-    function() {
-      this.plugin("done", function(statsData) {
-        const stats = statsData.toJson()
-        if (__PROD__ && !stats.errors.length) {
-          const htmlFileName = "index.html"
-          const appHash = statsData.compilation.namedChunks['app'].hash.substr(0,20)
-          const vendorHash = statsData.compilation.namedChunks['vendor'].hash.substr(0,20)
-          const html = FileSystem.readFileSync(path.join(__dirname, htmlFileName), "utf8")
-          var htmlOutput = html.replace(
-            `<script src='\/vendor.js'><\/script>`,
-            `<script src='/vendor-${vendorHash}.js'></script>`);
-          htmlOutput = htmlOutput.replace(
-            `<script src='\/app.js'><\/script>`,
-            `<script src='/app-${appHash}.js'></script>`);
-          FileSystem.writeFileSync(
-            path.join(__dirname, "dist", htmlFileName),
-            htmlOutput);
-        }
-      });
-    }
+    new HtmlWebpackPlugin({
+      filename: 'index.html',
+      template: '!!html-loader!index-template.html'
+    })
   ],
   resolve: {
     extensions: ['.ts','.js']
