@@ -13,6 +13,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@cycle/collection": "^0.5.1",
     "@cycle/dom": "^16.0.0",
     "@cycle/history": "^6.0.0",
     "@cycle/isolate": "^2.1.0",

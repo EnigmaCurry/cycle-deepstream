@@ -14,7 +14,7 @@ export function Home(sources: Sources): Sinks {
   const postListing$ = user$
     .filter(userData => userData !== null)
     .map(userData => isolate(Post)(
-      { ...sources, props$: xs.of({ id: 'main', expandChildren: 1 }) }))
+      { ...sources, props$: xs.of({ id: 'p/main', expandChildren: 1 }) }))
 
   const vdom$ = postListing$
     .map(post => post.DOM)

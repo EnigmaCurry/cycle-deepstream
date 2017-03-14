@@ -144,5 +144,5 @@ run(main, {
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
   // cycle-deepstream driver
-  deep$: makeDeepstreamDriver(`${window.location.hostname}:6020`)
+  deep$: makeDeepstreamDriver({ url: `${window.location.hostname}:6020`, debug: true })
 })

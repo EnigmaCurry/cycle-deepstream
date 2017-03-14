@@ -7,9 +7,9 @@ export function logout() {
 }
 
 export const record = {
-  subscribe: (record: string) => ({ action: 'record.subscribe', name: record })
+  subscribe: (record: string, events = {}) => ({ action: 'record.subscribe', name: record, events: events })
 }
 
 export const list = {
-  subscribe: (record: string) => ({ action: 'list.subscribe', name: record })
+  subscribe: (record: string, events = {}) => ({ action: 'list.subscribe', name: record, events: events })
 }
