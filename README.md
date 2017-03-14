@@ -37,6 +37,12 @@ Deepstream API Implementation:
       - [x] logout
   - Records:
     - [x] record.subscribe
+       - Note: Only one subscription is supported per record, and no
+         paths or callbacks are supported. Because the record
+         subscription is broadcast to all driver listeners, only one
+         subscription is ever needed. Subsequent record.subscribe
+         requests for the same id are ignored unless you call
+         record.discard first.
        - once subscribed, will emit events:
          - [x] record.change
          - [x] record.discard
@@ -49,13 +55,22 @@ Deepstream API Implementation:
     - [x] record.delete
     - [x] record.listen
     - [ ] record.unsubscribe 
-      - Not implemented. Would need to specify an id to subscribe() and 
-        then pass the same id on unsubscribe, in order to track the callback.
+      - Not implemented. There is only ever one subscription per
+        record, so use record.discard instead.
     
   - Lists:
     - [x] list.subscribe
+       - Note: Only one subscription is supported per list, and no
+         paths or callbacks are supported. Because the list
+         subscription is broadcast to all driver listeners, only one
+         subscription is ever needed. Subsequent list.subscribe
+         requests for the same id are ignored unless you call
+         list.discard first.
       - once subscribed, will emit events:
          - [x] list.change
+         - [x] list.entry-existing
+           - This emits individual events for each existing entry, like list.entry-added.
+           - Note, this is a driver level event, not a part of the Deepstream API.
          - [x] list.discard
          - [x] list.delete
          - [x] list.error
@@ -68,7 +83,9 @@ Deepstream API Implementation:
     - [x] list.removeEntry
     - [x] list.discard
     - [x] list.delete
-    - [x] list.unsubscribe
+    - [ ] list.unsubscribe
+      - Not implemented. There is only ever one subscription per
+        list, so use list.discard instead.
     
     
   - Events:
