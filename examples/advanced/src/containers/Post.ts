@@ -36,11 +36,16 @@ function view(post: PostRecord) {
 export function Post(sources: Sources): Sinks {
   const { DOM, deep$, props$ } = sources
 
-  const request$ = xs.merge(
+  // Deepstream requests to load the post data:
+  const postRequest$ = xs.merge(
     // Request the post specified in props.id
     props$.map(({ id }) => ds.record.subscribe(id)),
     // Request the list of children posts:
-    // We pass list.change=false beause we only need list.entry-* events.
+    // We pass list.change=false to omit redundant data that is also
+    // in the list.entry-* events (change events is the WHOLE list
+    // every time, whereas the entry-* events are for individual
+    // elements in the list. You could code it either way, but we'll
+    // use the individual events.)
     props$.map(({id}) => ds.list.subscribe(`${id}/children`, { 'list.change': false }))
   )
 
@@ -54,35 +59,38 @@ export function Post(sources: Sources): Sinks {
       { content: '[deleted]' } : effect.data)
     .startWith({ content: "Loading post ..." })
 
-  const postChildren$ = xs.combine(props$, deep$)
+  const children$ = xs.combine(props$, deep$)
     .filter(([props, effect]) => effect.name === `${props.id}/children`)
     .map(([props, effect]) => effect)
-    .filter(effect => effect.event === 'list.change')
 
-  // // Construct child Post containers based on the list of children posts:
-  // const childContainer$ = xs.combine(props$, deep$)
-  //   .filter(([props, effect]) => effect.name === `${props.id}/children`)
-  //   .map(([props, effect]) => effect)
-  //   .filter(effect => effect.event === 'list.change')
-  //   //Maintain a list of all instantiated sub Post containers:
-  //   //deepstream always sends the full list (newList), so the job of
-  //   //fold is just to remove old and add new containers over time (containers.)
-  //   .fold((containers, newList) => {
-  //     // Remove containers not found in newList:
-  //     const newContainers = _.pick(containers, newList)
-  //     // Add new containers from newlist
-  //     _.forEach(_.difference(newList, Object.keys(containers)), (record) => {
-  //       newContainers[record] = isolate(Post)(
-  //         { ...sources, props$: xs.of({ id: record, expandChildren: 1 }) })
-  //     })
-  //     return newContainers
-  //   }, {})
+  // Create stream of props for new child posts added:
+  const childProps$ = children$
+    .filter(effect => effect.event === 'list.entry-existing' ||
+      effect.event === 'list.entry-added')
+    .map(effect => ({ id: effect.entry, expandChildren: 1 }))
 
-  const vdom$ = xs.of(h('div', 'hi for now'))
+  // Create stream of remove events for a particular child post:
+  const getChildRemoveStream = (recordName$) => xs.combine(children$, recordName$)
+    .filter(([effect, recordName]) => effect.event === 'list.entry-removed')
+    .filter(([effect, recordName]) => effect.name === recordName)
+    .mapTo('remove me')
 
-  return {
+  // The list of all children post containers, composed as a fractal tree of Posts.
+  const childPosts$ = Collection(Post, { deep$ }, childProps$, item => getChildRemoveStream(item.id$))
+  const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
+  const vdom$ = xs.combine(post$, childPostsVdom$)
+    .map(([post, childrenDOM]) => h('div.post', [
+      h('div.hi', view(post)),
+      h('div.children', childrenDOM)]))
+
+  const childRequest$ = Collection.pluck(childPosts$, item => item.deep$)
+  const request$ = xs.merge(postRequest$, childRequest$)
+    .debug(console.log)
+
+  return <Sinks>{
     DOM: vdom$,
-    deep$: <Stream<DeepstreamRequest>>request$,
-    history$: xs.never()
+    deep$: request$,
+    history$: xs.never(),
+    id$: props$.map(props => props.id)
   }
 }

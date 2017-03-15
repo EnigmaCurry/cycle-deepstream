@@ -15,7 +15,9 @@ export type DeepstreamRequest = {
 export type DeepstreamEvent = {
   event: string,
   name: string,
-  data?: any
+  data?: any,
+  entry?: string,
+  position?: number
 }
 
 // Sources that all components receive:

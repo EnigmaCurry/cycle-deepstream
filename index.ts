@@ -236,15 +236,19 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}) {
         }, intent.events)
         logAction(intent.action, intent.name, intent.events ? intent.events : '')
         getList(intent.name).then(list => {
+          // Is this the first time the subscription callback is called?
+          let callbackFirstCall = true
           list.subscribe(data => {
             if (events['list.change']) {
               emit({ event: 'list.change', name: list.name, data: data })
             }
-            if (events['list.entry-existing']) {
+            // Only do this the *first* time the callback is called, on subscription:
+            if (events['list.entry-existing'] && callbackFirstCall) {
               for (let i = 0; i < data.length; i++) {
                 emit({ event: 'list.entry-existing', name: list.name, entry: data[i], position: i })
               }
             }
+            callbackFirstCall = false
           }, true)
           if (events['list.discard']) {
             list.on('discard', () => {
