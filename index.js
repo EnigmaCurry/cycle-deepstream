@@ -92,7 +92,11 @@ export function makeDeepstreamDriver(url, auth={}, options={}) {
     const recordSetListener = recordSet$.addListener({
       next: intent => {
         getRecord(intent.name).then(record => {
-          record.set(intent.path, intent.data)
+          if (typeof intent.path === undefined) {
+            record.set(intent.data)
+          } else {
+            record.set(intent.path, intent.data)
+          }
         })
       },
       error: () => {},
