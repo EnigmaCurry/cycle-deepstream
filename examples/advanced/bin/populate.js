@@ -10,4 +10,3 @@ child1.set({content:'This is child1'})
 
 const children = ds.record.getList('p/main/children')
 children.addEntry(child1.name)
-

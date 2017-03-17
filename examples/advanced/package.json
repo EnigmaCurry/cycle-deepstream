@@ -25,6 +25,7 @@
     "markdown-it": "^8.3.1",
     "path-to-regexp": "^1.7.0",
     "style-loader": "^0.13.2",
+    "uuid": "^3.0.1",
     "xstream": "^10.3.0"
   },
   "devDependencies": {
