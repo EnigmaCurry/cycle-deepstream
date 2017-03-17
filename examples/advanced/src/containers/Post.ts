@@ -14,13 +14,13 @@ type PostRecord = {
   content: string
 }
 
-function view(post: PostRecord) {
+function view(post: PostRecord, children) {
   //Render post content from markdown to HTML.
   const content = markdown.render(post.content ? post.content : 'Nothing here')
   //Manually create a DOM element and corece it into a snabbdom VNode:
-  const elm = document.createElement('div')
+  const elm = document.createElement('div.content')
   elm.innerHTML = content
-  return toVNode(elm)
+  return h('div.post', [toVNode(elm), h('div.children', children)])
 }
 
 //Construct a Post and its children's Posts recursively:
@@ -34,7 +34,7 @@ function view(post: PostRecord) {
 //  - Each Post is responsible for creating it's children containers and
 //    hooking it up to it's parent Post's sinks.
 export function Post(sources: Sources): Sinks {
-  const { DOM, deep$, props$ } = sources
+  const { deep$, props$ } = sources
 
   // Deepstream requests to load the post data:
   const postRequest$ = xs.merge(
@@ -57,7 +57,6 @@ export function Post(sources: Sources): Sinks {
       effect.event === 'record.delete')
     .map(effect => effect.event === 'record.delete' ?
       { content: '[deleted]' } : effect.data)
-    .startWith({ content: "Loading post ..." })
 
   const children$ = xs.combine(props$, deep$)
     .filter(([props, effect]) => effect.name === `${props.id}/children`)
@@ -67,7 +66,7 @@ export function Post(sources: Sources): Sinks {
   const childProps$ = children$
     .filter(effect => effect.event === 'list.entry-existing' ||
       effect.event === 'list.entry-added')
-    .map(effect => ({ id: effect.entry, expandChildren: 1 }))
+    .map(effect => ({ props$: xs.of({ id: effect.entry, expandChildren: 1 }) }))
 
   // Create stream of remove events for a particular child post:
   const getChildRemoveStream = (recordName$) => xs.combine(children$, recordName$)
@@ -77,15 +76,17 @@ export function Post(sources: Sources): Sinks {
 
   // The list of all children post containers, composed as a fractal tree of Posts.
   const childPosts$ = Collection(Post, { deep$ }, childProps$, item => getChildRemoveStream(item.id$))
-  const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
-  const vdom$ = xs.combine(post$, childPostsVdom$)
-    .map(([post, childrenDOM]) => h('div.post', [
-      h('div.hi', view(post)),
-      h('div.children', childrenDOM)]))
 
-  const childRequest$ = Collection.pluck(childPosts$, item => item.deep$)
+  const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
+
+  const vdom$ = xs.combine(post$, childPostsVdom$)
+    .map(([post, childrenDOM]) => view(post, childrenDOM))
+
+  const childRequest$ = childPosts$
+    .map(postList => xs.merge.apply(null, postList.map(post => post.deep$)))
+    .flatten()
+
   const request$ = xs.merge(postRequest$, childRequest$)
-    .debug(console.log)
 
   return <Sinks>{
     DOM: vdom$,

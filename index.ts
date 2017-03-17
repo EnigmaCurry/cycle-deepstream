@@ -107,7 +107,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}) {
           'record.delete': true,
           'record.error': true
         }, intent.events)
-        logAction(intent.action, intent.name, intent.events ? intent.events : '')
+        logAction(intent.action, intent.name, intent.events ? JSON.stringify(intent.events) : '')
         getRecord(intent.name).then(record => {
           if (events['record.change']) {
             record.subscribe(data => {
@@ -234,7 +234,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}) {
           'list.entry-moved': true,
           'list.entry-removed': true
         }, intent.events)
-        logAction(intent.action, intent.name, intent.events ? intent.events : '')
+        logAction(intent.action, intent.name, intent.events ? JSON.stringify(intent.events) : '')
         getList(intent.name).then(list => {
           // Is this the first time the subscription callback is called?
           let callbackFirstCall = true
