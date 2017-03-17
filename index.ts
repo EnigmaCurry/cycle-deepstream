@@ -169,7 +169,11 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}) {
       next: intent => {
         logAction(intent.action, intent.name)
         getRecord(intent.name).then(record => {
-          record.set(intent.path, intent.data)
+          if (typeof intent.path === undefined) {
+            record.set(intent.data)
+          } else {
+            record.set(intent.path, intent.data)
+          }
         })
       },
       error: () => { },
