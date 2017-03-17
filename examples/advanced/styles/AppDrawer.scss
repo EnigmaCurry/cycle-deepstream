@@ -1,0 +1,32 @@
+#contentContainer.app-drawer {
+    color: #fff;
+    background-color: #263238 !important;
+    margin-right: 1em;
+}
+
+.app-drawer-content {
+    .button {
+        background-color: #78909C;
+        color: #fff;
+    }
+    .button.profile {
+        width: 7em;
+        margin-left: 1em;
+        margin-bottom: 0.5em;
+    }
+    .avatar {
+        width: 100px;
+        float:left;
+        margin-left: 1em;
+        margin-bottom: 1em;
+        vertical-align: top;
+    }
+
+    h1 {
+        margin-bottom: 0.25em;
+    }
+
+    hr {
+        width: 90%;
+    }
+}

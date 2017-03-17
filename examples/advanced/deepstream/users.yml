@@ -1,0 +1,32 @@
+john:
+  password: john
+  serverData:
+    groups:
+      - beatles
+  clientData:
+    userid: john
+    name: John
+paul:
+  password: paul
+  serverData:
+    groups:
+      - beatles
+  clientData:
+    userid: paul
+    name: Paul
+george:
+  password: george
+  serverData:
+    groups:
+      - beatles
+  clientData:
+    userid: george
+    name: George
+ringo:
+  password: ringo
+  serverData:
+    groups:
+      - beatles
+  clientData:
+    userid: ringo
+    name: Ringo
