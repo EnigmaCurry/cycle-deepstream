@@ -11,13 +11,15 @@ import _ from 'lodash'
 
 const markdown = new Markdown()
 
-function view(post: { content: string }, children) {
-  //Render post content from markdown to HTML.
-  const content = markdown.render(post.content ? post.content : 'Nothing here')
+function view(post: { title: string, content: string }, children) {
   //Manually create a DOM element and corece it into a snabbdom VNode:
-  const elm = document.createElement('div.content')
-  elm.innerHTML = content
-  return h('div.post', { key: uuid4() }, [toVNode(elm), h('div.children', { key: uuid4() }, children)])
+  const content = document.createElement('div.content')
+  //Render post content from markdown to HTML:
+  content.innerHTML = markdown.render(post.content ? post.content : '[no content]')
+  return h('div.post', { key: uuid4() }, [
+    h('div.title', post.title ? post.title : '[no title]'),
+    toVNode(content),
+    h('div.children', { key: uuid4() }, children)])
 }
 
 //Construct a Post and its children's Posts recursively:
