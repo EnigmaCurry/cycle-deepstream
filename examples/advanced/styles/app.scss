@@ -20,8 +20,9 @@ app-header {
 
 #app-content > div.post > div.title {
     font-size: 2em;
+    display: inline;
 }
 
-div.post > div.title {
-    font-size: 1.5em;
+div.children div.title {
+    display: none;
 }
