@@ -20,9 +20,48 @@ app-header {
 
 paper-card.post {
     width: 100%;
+}
+
+.card-content.post {
     margin-bottom: 1em;
 }
 
-div.post-children paper-card {
+.post-children {
+    margin-left: 1em;
+}
+.post-children paper-card {
+    display: inline-block;
+    margin-bottom: 1em;
+}
+
+.post-children .post-title {
+    display:none;
+}
+
+ul.post-footer {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.post-footer li {
+    list-style-type: none;
+    display: inline-block;
+}
+
+.replybox .textbox {
     display: block;
+}
+
+.replybox paper-button {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.replybox paper-button.send:hover {
+    color: #fff;
+    background-color: #4caf50;
+}
+.replybox paper-button.cancel:hover {
+    color: #fff;
+    background-color: #ff4081;
 }

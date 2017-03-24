@@ -21,6 +21,7 @@
     "iron-icons": "^1.2.0",
     "paper-button": "^1.0.14",
     "paper-fab": "^1.2.1",
-    "paper-card": "PolymerElements/paper-card#^1.1.4"
+    "paper-card": "PolymerElements/paper-card#^1.1.4",
+    "iron-autogrow-textarea": "PolymerElements/iron-autogrow-textarea#^1.0.15"
   }
 }

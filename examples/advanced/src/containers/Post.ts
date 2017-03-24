@@ -11,15 +11,24 @@ import _ from 'lodash'
 
 const markdown = new Markdown()
 
-function view(post: { title: string, content: string }, children) {
+function view(postId, post: { title: string, content: string }, children, showReplyBox = false) {
   //Manually create a DOM element and corece it into a snabbdom VNode:
   const content = document.createElement('div.content')
   //Render post content from markdown to HTML:
   content.innerHTML = markdown.render(post.content ? post.content : '[no content]')
   return h('paper-card.post', { key: uuid4() }, [
-    h('div.card-content', [
+    h(`div.card-content.post#post-${postId}`, [
       h('div.post-title', post.title ? post.title : '[no title]'),
       toVNode(content),
+      h('ul.post-footer', [
+        h('li', h(`paper-icon-button#star-${postId}`, { attrs: { icon: 'star' } })),
+        h('li', h(`paper-icon-button#reply-${postId}`, { attrs: { icon: 'reply' } }))
+      ]),
+      h('div.replybox', { style: { display: showReplyBox ? 'block' : 'none' } }, [
+        h('iron-autogrow-textarea.textbox', { attrs: { rows: 4, placeholder: 'Reply with your comment here' } }),
+        h(`paper-button#send-${postId}.send`, { attrs: { raised: '' } }, "send"),
+        h(`paper-button#cancel-${postId}.cancel`, { attrs: { raised: '' } }, "cancel")
+      ]),
       h('div.post-children', { key: uuid4() }, children)
     ])
   ])
@@ -36,7 +45,7 @@ function view(post: { title: string, content: string }, children) {
 //  - Each Post is responsible for creating it's children containers and
 //    hooking it up to it's parent Post's sinks.
 export function Post(sources: Sources): Sinks {
-  const { deep$, props$ } = sources
+  const { DOM, deep$, props$ } = sources
 
   // Deepstream requests to load the post data:
   const postRequest$ = xs.merge(
@@ -77,12 +86,22 @@ export function Post(sources: Sources): Sinks {
     .mapTo('remove me')
 
   // The list of all children post containers, composed as a fractal tree of Posts.
-  const childPosts$ = Collection(Post, { deep$ }, childProps$, item => getChildRemoveStream(item.id$))
+  const childPosts$ = Collection(Post, sources, childProps$, item => getChildRemoveStream(item.id$))
 
   const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
 
-  const vdom$ = xs.combine(post$, childPostsVdom$)
-    .map(([post, childrenDOM]) => view(post, childrenDOM))
+  const showReplyBox$ = props$
+    .map(props => props.id.replace(/\//g, '_'))
+    .map(elemId => xs.merge(
+      DOM.select(`#reply-${elemId}`).events('click').mapTo(true),
+      DOM.select(`#cancel-${elemId}`).events('click').mapTo(false),
+    ))
+    .flatten()
+    .debug('here')
+    .startWith(false)
+
+  const vdom$ = xs.combine(props$, post$, childPostsVdom$, showReplyBox$)
+    .map(([props, post, childrenDOM, showReplyBox]) => view(props.id.replace(/\//g, '_'), post, childrenDOM, showReplyBox))
 
   const childRequest$ = childPosts$
     .map(postList => xs.merge.apply(null, postList.map(post => post.deep$)))
