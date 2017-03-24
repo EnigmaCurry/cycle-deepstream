@@ -16,10 +16,13 @@ function view(post: { title: string, content: string }, children) {
   const content = document.createElement('div.content')
   //Render post content from markdown to HTML:
   content.innerHTML = markdown.render(post.content ? post.content : '[no content]')
-  return h('div.post', { key: uuid4() }, [
-    h('div.title', post.title ? post.title : '[no title]'),
-    toVNode(content),
-    h('div.children', { key: uuid4() }, children)])
+  return h('paper-card.post', { key: uuid4() }, [
+    h('div.card-content', [
+      h('div.post-title', post.title ? post.title : '[no title]'),
+      toVNode(content),
+      h('div.post-children', { key: uuid4() }, children)
+    ])
+  ])
 }
 
 //Construct a Post and its children's Posts recursively:

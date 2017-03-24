@@ -18,11 +18,11 @@ app-header {
     text-align: center;
 }
 
-#app-content > div.post > div.title {
-    font-size: 2em;
-    display: inline;
+paper-card.post {
+    width: 100%;
+    margin-bottom: 1em;
 }
 
-div.children div.title {
-    display: none;
+div.post-children paper-card {
+    display: block;
 }
