@@ -35,19 +35,22 @@ waitForDeepstream(host)
         // Populate the database with initial test data
         ds.record.getRecord('p/main').whenReady(main => {
           if (main.get().content === undefined) {
-            main.set({title:'From Me to You', content:' * one\n * two\n * three\n'}, res => {
-              const child1 = ds.record.getRecord('p/main/child1')
-              child1.set({content:'This is child1'}, res => {
-                const children = ds.record.getList('p/main/children')
-                children.on('entry-added', (entry, pos) => {
-                  if (entry === child1.name) {
-                    console.log("Populated database")
-                    ds.close()
-                  }
-                })
-                children.addEntry(child1.name)
-              })
+            main.set({title:'From Me to You', content:' * one\n * two\n * three\n'}) 
+            const child1 = ds.record.getRecord('p/main/child1')
+            child1.set({content:'This is child1'})
+            const child2 = ds.record.getRecord('p/main/child2')
+            child2.set({content:'This is child2'})
+            const children = ds.record.getList('p/main/children')
+            children.setEntries([child1.name, child2.name])
+            const grandchildren = ds.record.getList('p/main/child1/children')
+            const grandchild1 = ds.record.getRecord('p/main/child1/grandchild1')
+            grandchild1.set({content:'This is a child of a child'})
+            grandchildren.addEntry(grandchild1.name)
+            grandchildren.on('discard', _ => {
+              console.log("Populated database")
+              ds.close()
             })
+            grandchildren.discard()
           } else {
             console.log("Database already populated")
             ds.close()
