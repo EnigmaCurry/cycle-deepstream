@@ -1,3 +1,8 @@
+admin:
+  password: admin
+  serverData:
+    groups:
+      - admin
 john:
   password: john
   serverData:

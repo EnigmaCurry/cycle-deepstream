@@ -7,9 +7,10 @@
     "dist": "npm run clean && NODE_ENV=production webpack",
     "deepstream": "deepstream start -c deepstream/config.yml",
     "serve": "webpack-dev-server --host 0.0.0.0 --open",
+    "rpcserver": "ts-node server/rpcserver.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "populatedb": "node bin/populate.js",
-    "start": "npm install && bower install && npm-run-all --parallel deepstream serve populatedb"
+    "dependencies": "npm install && bower install",
+    "start": "npm-run-all --parallel deepstream serve rpcserver"
   },
   "author": "",
   "license": "MIT",
@@ -21,6 +22,7 @@
     "@cycle/run": "^3.0.0",
     "css-loader": "^0.27.1",
     "deepstream.io": "^2.1.3",
+    "deepstream.io-client-js": "^2.1.2",
     "dom-events": "^0.1.1",
     "global-object": "^1.0.0",
     "markdown-it": "^8.3.1",
@@ -45,6 +47,7 @@
     "sass-loader": "^6.0.3",
     "source-map-loader": "^0.1.6",
     "ts-loader": "^2.0.1",
+    "ts-node": "^3.0.2",
     "typescript": "^2.2.1",
     "wc-loader": "^1.1.1",
     "webpack": "^2.2.1",

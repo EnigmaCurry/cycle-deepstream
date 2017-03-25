@@ -18,5 +18,6 @@
    "files": [
      "src/app.ts",
      "node_modules/@types/node/index.d.ts"
-   ]
+   ],
+  "typeRoots": [ "./node_modules/deepstream.io-client.js/src/client.d.ts" ]
 }
