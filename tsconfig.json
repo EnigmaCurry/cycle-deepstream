@@ -7,7 +7,7 @@
       "dom"
     ],
     "outDir": "dist",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "sourceMap": true,
     "declaration": true
   },

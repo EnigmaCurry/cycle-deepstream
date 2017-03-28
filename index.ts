@@ -1,16 +1,46 @@
 import xs, { Stream } from 'xstream'
-import { adapt } from '@cycle/run/lib/adapt'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
+
+export interface Intent {
+  action: string
+  name?: string
+}
+
+export interface LoginIntent extends Intent {
+  auth: Object
+}
+
+export interface SubscribeIntent extends Intent {
+  events: Object
+}
+
+export interface RecordSetIntent extends Intent {
+  data: Object,
+  path?: string,
+}
+
+export interface ListSetIntent extends Intent {
+  entries: Array<string>
+}
+
+export interface ListEntryIntent extends Intent {
+  entry: string,
+  index: number
+}
+
+export interface ListenIntent extends Intent {
+  pattern: string
+}
 
 export function makeDeepstreamDriver({url, options = {}, debug = false}:
   { url: string, options: Object, debug: boolean }) {
 
-  return function deepstreamDriver(action$) {
+  return function deepstreamDriver(action$: Stream<Intent>) {
 
     let client: deepstreamIO.Client
-    let cachedRecords = {}
-    let cachedLists = {}
+    let cachedRecords: any = {}
+    let cachedLists: any = {}
 
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
@@ -19,11 +49,11 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       events.emit('deepstream-event', data)
     }
 
-    function logAction(...msgs) {
+    function logAction(...msgs: Array<string>) {
       if (debug)
         console.debug.apply(null, ['deepstream action:', ...msgs])
     }
-    function logEvent(...msgs) {
+    function logEvent(...msgs: Array<string>) {
       if (debug)
         console.debug.apply(null, ['deepstream event:', ...msgs])
     }
@@ -32,8 +62,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       return new Promise((resolve, reject) => {
         const record = cachedRecords[name] === undefined ?
           client.record.getRecord(name) : cachedRecords[name]
-        record.on('error', err => reject(err))
-        record.whenReady(record => {
+        record.on('error', (err: string) => reject(err))
+        record.whenReady((record: deepstreamIO.Record) => {
           cachedRecords[name] = record
           resolve(record)
         })
@@ -44,8 +74,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       return new Promise((resolve, reject) => {
         const list = cachedLists[name] === undefined ?
           client.record.getList(name) : cachedLists[name]
-        list.on('error', err => reject(err))
-        list.whenReady(list => {
+        list.on('error', (err: string) => reject(err))
+        list.whenReady((list: deepstreamIO.List) => {
           cachedLists[name] = list
           resolve(list)
         })
@@ -54,7 +84,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     const login$ = action$.filter(intent => intent.action === 'login')
     const loginListener = login$.addListener({
-      next: intent => {
+      next: (intent: LoginIntent) => {
         logAction(intent.action, '(auth details hidden)')
         if (client !== undefined) {
           client.close()
@@ -62,17 +92,18 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         // Delete caches:
         cachedRecords = {}
         cachedLists = {}
-        client = (<any>window).ds = deepstream(url, options).login(intent.auth, (success, data) => {
-          if (success) {
-            emit({ event: 'login.success', data })
-          } else {
-            emit({ event: 'login.failure', data })
-          }
-        })
-        client.on('error', (error) => {
+        client = (<any>window).ds = deepstream(url, options).login(
+          intent.auth, (success: boolean, data: Object) => {
+            if (success) {
+              emit({ event: 'login.success', data })
+            } else {
+              emit({ event: 'login.failure', data })
+            }
+          })
+        client.on('error', (error: string) => {
           emit({ event: 'client.error', error })
         })
-        client.on('connectionStateChanged', (state) => {
+        client.on('connectionStateChanged', (state: string) => {
           emit({ event: 'connection.state', state })
         })
       },
@@ -99,7 +130,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const recordSubscription$ = action$.filter(intent => intent.action === 'record.subscribe'
       && intent.name != undefined)
     const recordSubscriptionListener = recordSubscription$.addListener({
-      next: intent => {
+      next: (intent: SubscribeIntent) => {
         const events = Object.assign({
           'record.change': true,
           'record.discard': true,
@@ -109,7 +140,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         logAction(intent.action, intent.name, intent.events ? JSON.stringify(intent.events) : '')
         getRecord(intent.name).then(record => {
           if (events['record.change']) {
-            record.subscribe(data => {
+            record.subscribe((data: Object) => {
               emit({ event: 'record.change', name: record.name, data: data })
             }, true)
           }
@@ -124,7 +155,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
             })
           }
           if (events['record.error']) {
-            record.on('error', (err) => {
+            record.on('error', (err: string) => {
               emit({ event: 'record.error', name: record.name, error: err })
             })
           }
@@ -163,9 +194,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     const recordSet$ = action$.filter(intent => intent.action === 'record.set'
       && intent.name != undefined
-      && intent.data != undefined)
+      && (<RecordSetIntent>intent).data != undefined)
     const recordSetListener = recordSet$.addListener({
-      next: intent => {
+      next: (intent: RecordSetIntent) => {
         logAction(intent.action, intent.name)
         getRecord(intent.name).then(record => {
           if (typeof intent.path === undefined) {
@@ -210,9 +241,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordListen$ = action$.filter(intent => intent.action === 'record.listen'
-      && intent.pattern != undefined)
+      && (<ListenIntent>intent).pattern != undefined)
     const recordListenListener = recordListen$.addListener({
-      next: intent => {
+      next: (intent: ListenIntent) => {
         logAction(intent.action, intent.name)
         client.record.listen(intent.pattern, (match, isSubscribed, response) => {
           response.accept()
@@ -226,7 +257,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const listSubscription$ = action$.filter(intent => intent.action === 'list.subscribe'
       && intent.name != undefined)
     const listSubscriptionListener = listSubscription$.addListener({
-      next: intent => {
+      next: (intent: SubscribeIntent) => {
         const events = Object.assign({
           'list.change': true,
           'list.entry-existing': true,
@@ -241,7 +272,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         getList(intent.name).then(list => {
           // Is this the first time the subscription callback is called?
           let callbackFirstCall = true
-          list.subscribe(data => {
+          list.subscribe((data: Array<string>) => {
             if (events['list.change']) {
               emit({ event: 'list.change', name: list.name, data: data })
             }
@@ -264,22 +295,22 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
             })
           }
           if (events['list.error']) {
-            list.on('error', (err) => {
+            list.on('error', (err: string) => {
               emit({ event: 'list.error', name: list.name, error: err })
             })
           }
           if (events['list.entry-added']) {
-            list.on('entry-added', (entry, position) => {
+            list.on('entry-added', (entry: string, position: number) => {
               emit({ event: 'list.entry-added', name: list.name, entry, position })
             })
           }
           if (events['list.entry-moved']) {
-            list.on('entry-moved', (entry, position) => {
+            list.on('entry-moved', (entry: string, position: number) => {
               emit({ event: 'list.entry-moved', name: list.name, entry, position })
             })
           }
           if (events['list.entry-removed']) {
-            list.on('entry-removed', (entry, position) => {
+            list.on('entry-removed', (entry: string, position: number) => {
               emit({ event: 'list.entry-removed', name: list.name, entry, position })
             })
           }
@@ -303,10 +334,10 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listSetEntries$ = action$.filter(intent => intent.action === 'list.setEntries'
-      && intent.entries != undefined
+      && (<ListSetIntent>intent).entries != undefined
       && intent.name != undefined)
     const listSetEntriesListener = listSetEntries$.addListener({
-      next: intent => {
+      next: (intent: ListSetIntent) => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
           list.setEntries(intent.entries)
@@ -318,9 +349,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     const listAddEntry$ = action$.filter(intent => intent.action === 'list.addEntry'
       && intent.name != undefined
-      && intent.entry != undefined)
+      && (<ListEntryIntent>intent).entry != undefined)
     const listAddEntryListener = listAddEntry$.addListener({
-      next: intent => {
+      next: (intent: ListEntryIntent) => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
           list.addEntry(intent.entry, intent.index)
@@ -332,9 +363,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     const listRemoveEntry$ = action$.filter(intent => intent.action === 'list.removeEntry'
       && intent.name != undefined
-      && intent.entry != undefined)
+      && (<ListEntryIntent>intent).entry != undefined)
     const listRemoveEntryListener = listRemoveEntry$.addListener({
-      next: intent => {
+      next: (intent: ListEntryIntent) => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
           list.removeEntry(intent.entry, intent.index)
@@ -374,15 +405,13 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       complete: () => { }
     })
 
-    const effect$ = xs.create({
+    return xs.create({
       start: listener => {
-        events.on('deepstream-event', event => {
+        events.on('deepstream-event', (event: any) => {
           listener.next(event)
         })
       },
       stop: () => { }
     })
-
-    return adapt(effect$)
   }
 }
