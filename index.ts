@@ -1,42 +1,67 @@
+import { Driver } from '@cycle/run'
 import xs, { Stream } from 'xstream'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
 
-export interface Intent {
-  action: string
+export type Intent = {
+  action: string,
   name?: string
 }
 
-export interface LoginIntent extends Intent {
+export type LoginIntent = {
+  action: string,
+  name?: string,
   auth: Object
 }
 
-export interface SubscribeIntent extends Intent {
+export type SubscribeIntent = {
+  action: string,
+  name?: string,
   events: Object
 }
 
-export interface RecordSetIntent extends Intent {
+export type RecordSetIntent = {
+  action: string,
+  name?: string,
   data: Object,
   path?: string,
 }
 
-export interface ListSetIntent extends Intent {
+export type ListSetIntent = {
+  action: string,
+  name?: string,
   entries: Array<string>
 }
 
-export interface ListEntryIntent extends Intent {
+export type ListEntryIntent = {
+  action: string,
+  name?: string,
   entry: string,
   index: number
 }
 
-export interface ListenIntent extends Intent {
+export type ListenIntent = {
+  action: string,
+  name?: string,
   pattern: string
 }
 
-export function makeDeepstreamDriver({url, options = {}, debug = false}:
-  { url: string, options: Object, debug: boolean }) {
+export type Event = {
+  event: string,
+  name?: string,
+  data?: any,
+  entry?: string,
+  position?: number,
+  error?: string,
+  state?: string,
+  match?: string,
+  isSubscribed?: boolean
+}
 
-  return function deepstreamDriver(action$: Stream<Intent>) {
+export function makeDeepstreamDriver({url, options = {}, debug = false}:
+  { url: string, options?: Object, debug?: boolean }): Driver<Stream<Intent>, Stream<Event>> {
+
+  return function deepstreamDriver(action$) {
 
     let client: deepstreamIO.Client
     let cachedRecords: any = {}
@@ -44,7 +69,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
-    const emit = (data: Object) => {
+    const emit = (data: Event) => {
       logEvent(JSON.stringify(data))
       events.emit('deepstream-event', data)
     }
@@ -405,9 +430,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       complete: () => { }
     })
 
-    return xs.create({
+    return <Stream<Event>>xs.create({
       start: listener => {
-        events.on('deepstream-event', (event: any) => {
+        events.on('deepstream-event', (event: Event) => {
           listener.next(event)
         })
       },

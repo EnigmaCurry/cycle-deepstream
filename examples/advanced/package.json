@@ -9,7 +9,7 @@
     "serve": "webpack-dev-server --host 0.0.0.0 --open",
     "rpcserver": "ts-node server/rpcserver.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dependencies": "npm install && bower install",
+    "postinstall": "bower install",
     "start": "npm-run-all --parallel deepstream serve rpcserver"
   },
   "author": "",

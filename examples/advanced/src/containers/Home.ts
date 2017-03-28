@@ -4,8 +4,9 @@ import { PushHistoryInput } from '@cycle/history/lib'
 import isolate from '@cycle/isolate'
 import * as deepstream from '../actions/deepstream'
 import { Location } from 'history'
-import { Sources, Sinks, DeepstreamRequest } from '../types'
+import { Sources, Sinks } from '../types'
 import { Post } from '../containers'
+import { Intent as DSIntent } from '../../../../index'
 
 export function Home(sources: Sources): Sinks {
   const { DOM, history$, deep$, user$ } = sources
@@ -22,7 +23,7 @@ export function Home(sources: Sources): Sinks {
 
   // Connect Post.deep$ to Home.deep$ to allow it to fetch data and
   // receive events:
-  const postRequest$ = <Stream<DeepstreamRequest>>postListing$
+  const postRequest$ = <Stream<DSIntent>>postListing$
     .map(post => post.deep$)
     .flatten()
 

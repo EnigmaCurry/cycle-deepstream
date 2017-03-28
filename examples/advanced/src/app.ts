@@ -144,5 +144,7 @@ run(main, {
   // @cycle/history driver
   history$: captureClicks(makeHistoryDriver()),
   // cycle-deepstream driver
-  deep$: makeDeepstreamDriver({ url: `${window.location.hostname}:6020`, debug: true })
+  // TODO: Fix the type here, without 'any' it gives me 'Two different types with
+  // this name exist, but they are unrelated.' errors
+  deep$: <any>makeDeepstreamDriver({ url: `${window.location.hostname}:6020`, debug: true })
 })

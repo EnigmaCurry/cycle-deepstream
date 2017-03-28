@@ -9,7 +9,7 @@
     "postinstall": "npm run dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "simple": "cd examples/simple && npm install && npm run start",
-    "comprehensive": "cd examples/comprehensive && npm install && npm run start"
+    "advanced": "cd examples/advanced && npm install && npm run start"
   },
   "keywords": [
     "cyclejs",
