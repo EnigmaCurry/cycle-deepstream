@@ -1,15 +1,14 @@
-import xs from 'xstream'
+import xs, { Stream } from 'xstream'
 import { adapt } from '@cycle/run/lib/adapt'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
 
-export function makeDeepstreamDriver({url, options = {}, debug = false}) {
-  if (url === undefined) {
-    throw new Error('must specify deepstream host:PORT')
-  }
+export function makeDeepstreamDriver({url, options = {}, debug = false}:
+  { url: string, options: Object, debug: boolean }) {
 
   return function deepstreamDriver(action$) {
-    let client
+
+    let client: deepstreamIO.Client
     let cachedRecords = {}
     let cachedLists = {}
 
@@ -153,7 +152,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}) {
     const recordSnapshotListener = recordSnapshot$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
-        client.record.snapshot(intent.name, record => {
+        client.record.snapshot(intent.name, (error, record) => {
           emit({ event: 'record.snapshot', name: record.name, data: record })
         })
       },

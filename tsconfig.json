@@ -1,11 +1,18 @@
 {
-  compilerOptions: {
-    module: "commonjs",
-    target: "es5",
-    noImplicitAny: true,
-    sourceMap: true
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "lib": [
+      "es2016",
+      "dom"
+    ],
+    "outDir": "dist",
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "declaration": true
   },
-  typeRoots: [
+  "include": ["index.ts"],
+  "typeRoots": [
     "./node_modules/deepstream.io-client.js/src/client.d.ts"
   ]
 }
