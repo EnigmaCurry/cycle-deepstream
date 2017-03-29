@@ -15,14 +15,16 @@ Get the code:
 
     git clone https://github.com/EnigmaCurry/cycle-deepstream.git
     cd cycle-deepstream
+    npm install
     
-Run the comprehensive demo:
-
-    npm run comprehensive
-
-Or run the simple example:
+Run the simple example:
 
     npm run simple
+
+Or run the advanced demo:
+
+    npm run advanced
+
 
 Features
 ----------

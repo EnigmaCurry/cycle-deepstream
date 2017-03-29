@@ -18,6 +18,7 @@
   "author": "Ryan McGuire <ryan@enigmacurry.com>",
   "license": "MIT",
   "devDependencies": {
+    "file-loader": "^0.10.1",
     "rimraf": "^2.6.1",
     "typescript": "^2.2.2"
   },
