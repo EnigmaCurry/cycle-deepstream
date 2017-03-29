@@ -1,12 +1,14 @@
 import xs from 'xstream'
 import {run} from '@cycle/run'
 import { div, span, h1, hr, br, a, input, makeDOMDriver } from '@cycle/dom'
-import {makeDeepstreamDriver} from '../../../index'
+import {makeDeepstreamDriver} from '../../../dist/index'
 
 function main(sources) {
-
+  
   // Request stream is intents for deepstream driver to handle:
   const request$ = xs.merge(
+    // Login with anonymous credentials:
+    xs.of({action:'login'}),
     // Subscribe to the deepstream record named 'test':
     xs.of({ action: 'record.subscribe', name: 'test' }),
     // Update the record whenever the user enter's their name:
@@ -43,5 +45,5 @@ function main(sources) {
 
 run(main, {
   DOM: makeDOMDriver('#app'),
-  DEEP: makeDeepstreamDriver({url:`${window.location.hostname}:6020`})
+  DEEP: makeDeepstreamDriver({url:`${window.location.hostname}:6020`, debug:true})
 })
