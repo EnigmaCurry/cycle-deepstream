@@ -46,6 +46,12 @@ export type ListenIntent = {
   pattern: string
 }
 
+export type RPCIntent = {
+  action: string,
+  method: string,
+  data: Object
+}
+
 export type Event = {
   event: string,
   name?: string,
@@ -153,7 +159,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordSubscription$ = action$.filter(intent => intent.action === 'record.subscribe'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const recordSubscriptionListener = recordSubscription$.addListener({
       next: (intent: SubscribeIntent) => {
         const events = Object.assign({
@@ -191,7 +197,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordGet$ = action$.filter(intent => intent.action === 'record.get'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const recordGetListener = recordGet$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -204,7 +210,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordSnapshot$ = action$.filter(intent => intent.action === 'record.snapshot'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const recordSnapshotListener = recordSnapshot$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -218,8 +224,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
 
     const recordSet$ = action$.filter(intent => intent.action === 'record.set'
-      && intent.name != undefined
-      && (<RecordSetIntent>intent).data != undefined)
+      && intent.name !== undefined
+      && (<RecordSetIntent>intent).data !== undefined)
     const recordSetListener = recordSet$.addListener({
       next: (intent: RecordSetIntent) => {
         logAction(intent.action, intent.name)
@@ -236,7 +242,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordDelete$ = action$.filter(intent => intent.action === 'record.delete'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const recordDeleteListener = recordDelete$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -251,7 +257,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordDiscard$ = action$.filter(intent => intent.action === 'record.discard'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const recordDiscardListener = recordDiscard$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -266,7 +272,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const recordListen$ = action$.filter(intent => intent.action === 'record.listen'
-      && (<ListenIntent>intent).pattern != undefined)
+      && (<ListenIntent>intent).pattern !== undefined)
     const recordListenListener = recordListen$.addListener({
       next: (intent: ListenIntent) => {
         logAction(intent.action, intent.name)
@@ -280,7 +286,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listSubscription$ = action$.filter(intent => intent.action === 'list.subscribe'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const listSubscriptionListener = listSubscription$.addListener({
       next: (intent: SubscribeIntent) => {
         const events = Object.assign({
@@ -346,7 +352,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listGetEntries$ = action$.filter(intent => intent.action === 'list.getEntries'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const listGetEntriesListener = listGetEntries$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -359,8 +365,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listSetEntries$ = action$.filter(intent => intent.action === 'list.setEntries'
-      && (<ListSetIntent>intent).entries != undefined
-      && intent.name != undefined)
+      && (<ListSetIntent>intent).entries !== undefined
+      && intent.name !== undefined)
     const listSetEntriesListener = listSetEntries$.addListener({
       next: (intent: ListSetIntent) => {
         logAction(intent.action, intent.name)
@@ -373,8 +379,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listAddEntry$ = action$.filter(intent => intent.action === 'list.addEntry'
-      && intent.name != undefined
-      && (<ListEntryIntent>intent).entry != undefined)
+      && intent.name !== undefined
+      && (<ListEntryIntent>intent).entry !== undefined)
     const listAddEntryListener = listAddEntry$.addListener({
       next: (intent: ListEntryIntent) => {
         logAction(intent.action, intent.name)
@@ -387,8 +393,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listRemoveEntry$ = action$.filter(intent => intent.action === 'list.removeEntry'
-      && intent.name != undefined
-      && (<ListEntryIntent>intent).entry != undefined)
+      && intent.name !== undefined
+      && (<ListEntryIntent>intent).entry !== undefined)
     const listRemoveEntryListener = listRemoveEntry$.addListener({
       next: (intent: ListEntryIntent) => {
         logAction(intent.action, intent.name)
@@ -401,7 +407,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listDelete$ = action$.filter(intent => intent.action === 'list.delete'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const listDeleteListener = listDelete$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -416,7 +422,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     })
 
     const listDiscard$ = action$.filter(intent => intent.action === 'list.discard'
-      && intent.name != undefined)
+      && intent.name !== undefined)
     const listDiscardListener = listDiscard$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
@@ -424,6 +430,22 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           list.unsubscribe()
           list.discard()
           delete cachedLists[list.name]
+        })
+      },
+      error: () => { },
+      complete: () => { }
+    })
+
+    const rpcMake$ = action$.filter((intent: RPCIntent) => intent.action === 'rpc.make'
+      && intent.method !== undefined)
+    const rpcMakeListener = rpcMake$.addListener({
+      next: (intent: RPCIntent) => {
+        logAction(intent.action, intent.method, JSON.stringify(intent.data))
+        client.rpc.make(intent.method, intent.data, (error, result) => {
+          if (error) {
+            throw new Error(error)
+          }
+          // TODO how to link the rpc response to the original request? new ID?
         })
       },
       error: () => { },

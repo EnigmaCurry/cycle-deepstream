@@ -18,4 +18,6 @@ export const list = {
   subscribe: (record: string, events = {}) => ({ action: 'list.subscribe', name: record, events: events })
 }
 
-
+export const rpc = {
+  make: (method: string, data: Object) => ({ action: 'rpc.make', method: method, data })
+}

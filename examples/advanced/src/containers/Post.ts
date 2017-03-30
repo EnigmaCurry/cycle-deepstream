@@ -1,5 +1,5 @@
 import xs, { Stream } from 'xstream'
-import * as ds from '../actions/deepstream'
+import sampleCombine from 'xstream/extra/sampleCombine'
 import { VNode, h } from '@cycle/dom'
 import isolate from '@cycle/isolate'
 import Collection from '@cycle/collection'
@@ -8,6 +8,8 @@ import * as Markdown from 'markdown-it'
 import { toVNode } from 'snabbdom/tovnode'
 import * as uuid4 from 'uuid/v4'
 import _ from 'lodash'
+
+import * as ds from '../../../../actions'
 
 const markdown = new Markdown()
 
@@ -28,7 +30,7 @@ function view(postId, post: { title: string, content: string }, children, showRe
           h('li', h(`paper-icon-button#reply-${postId}`, { attrs: { icon: 'reply' } }))
         ]),
         h('div.replybox', { style: { display: showReplyBox ? 'block' : 'none' } }, [
-          h('iron-autogrow-textarea.textbox', { attrs: { rows: 4, placeholder: 'Reply with your comment here' } }),
+          h(`iron-autogrow-textarea#replybox-${postId}.textbox`, { attrs: { rows: 4, placeholder: 'Reply with your comment here' } }),
           h(`paper-button#send-${postId}.send`, { attrs: { raised: '' } }, "send"),
           h(`paper-button#cancel-${postId}.cancel`, { attrs: { raised: '' } }, "cancel")
         ]),
@@ -51,6 +53,11 @@ function view(postId, post: { title: string, content: string }, children, showRe
 export function Post(sources: Sources): Sinks {
   const { DOM, deep$, props$ } = sources
 
+  //DOM wrapper id - use this to differentiate different posts inside the DOM.
+  //Our IDs allow forward slashes, but the DOM doesn't, so replace those with '_':
+  const domID$ = props$
+    .map(props => props.id.replace(/\//g, '_'))
+
   // Deepstream requests to load the post data:
   const postRequest$ = xs.merge(
     // Request the post specified in props.id
@@ -67,11 +74,10 @@ export function Post(sources: Sources): Sinks {
   // Receive stream of changes to post data:
   const post$ = xs.combine(props$, deep$)
     .filter(([props, effect]) => effect.name === props.id)
-    .map(([props, effect]) => effect)
-    .filter(effect => effect.event === 'record.change' ||
+    .filter(([props, effect]) => effect.event === 'record.change' ||
       effect.event === 'record.delete')
-    .map(effect => effect.event === 'record.delete' ?
-      { content: '[deleted]' } : effect.data)
+    .map(([props, effect]) => effect.event === 'record.delete' ?
+      { name: props.id, content: '[deleted]' } : { name: props.id, ...effect.data })
 
   const children$ = xs.combine(props$, deep$)
     .filter(([props, effect]) => effect.name === `${props.id}/children`)
@@ -94,24 +100,48 @@ export function Post(sources: Sources): Sinks {
 
   const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
 
-  const showReplyBox$ = props$
-    .map(props => props.id.replace(/\//g, '_'))
+  const showReplyBox$ = domID$
     .map(elemId => xs.merge(
       DOM.select(`#reply-${elemId}`).events('click').mapTo(true),
       DOM.select(`#cancel-${elemId}`).events('click').mapTo(false),
+      DOM.select(`#send-${elemId}`).events('click').mapTo(false)
     ))
     .flatten()
-    .debug('here')
     .startWith(false)
 
-  const vdom$ = xs.combine(props$, post$, childPostsVdom$, showReplyBox$)
-    .map(([props, post, childrenDOM, showReplyBox]) => view(props.id.replace(/\//g, '_'), post, childrenDOM, showReplyBox))
+  const replyText$ = domID$
+    .map(elemId => DOM.select(`#replybox-${elemId} textarea`)
+      .events('change')
+      .map(ev => (<HTMLTextAreaElement>ev.target).value))
+    .flatten()
+    .remember()
+
+  const submitClick$ = domID$
+    .map(elemId => DOM.select(`#send-${elemId}`)
+      .events('click')
+      .mapTo(true))
+    .flatten()
+
+  const submitReply$ = submitClick$
+    .compose(sampleCombine(xs.combine(post$, replyText$)))
+    .map(([click, [parent, replyText]]) => {
+      console.log(parent)
+      return ds.rpc.make('create-post', {
+        parent: parent.name,
+        root: parent.root,
+        title: null,
+        content: replyText
+      })
+    })
+
+  const vdom$ = xs.combine(domID$, post$, childPostsVdom$, showReplyBox$)
+    .map(([domID, post, childrenDOM, showReplyBox]) => view(domID, post, childrenDOM, showReplyBox))
 
   const childRequest$ = childPosts$
     .map(postList => xs.merge.apply(null, postList.map(post => post.deep$)))
     .flatten()
 
-  const request$ = xs.merge(postRequest$, childRequest$)
+  const request$ = xs.merge(postRequest$, childRequest$, submitReply$)
 
   return <Sinks>{
     DOM: vdom$,
