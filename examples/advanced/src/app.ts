@@ -34,8 +34,6 @@ import { makeDeepstreamDriver } from '../../../index'
 require('../x-app.html')
 
 export const appTitle = 'Beatle Chat'
-const ghStars = 'https://ghbtns.com/github-btn.html?user=enigmacurry&repo=cycle-deepstream&type=watch&count=true&size=large'
-
 
 // Application URL route to component mapping:
 const routes: Array<Route> = [
@@ -113,15 +111,7 @@ function main(sources: MainSources): MainSinks {
   const appDrawer = isolate(AppDrawer)({ sources, deep$, DOM: drawer$ })
   // App header bar content:
   const appHeaderDOM$ = title$
-    .map(title => h('div', [
-      h('div', { attrs: { mainTitle: '' } }, title),
-      h('iframe.ghstars', {
-        attrs: {
-          src: ghStars, width: 160, height: 30,
-          allowTransparency: true, frameBorder: 0
-        }
-      })
-    ]))
+    .map(title => h('div', h('div', { attrs: { mainTitle: '' } }, title)))
 
   // Return our (merged and combined) Sinks back to our cycle drivers:
   return {
