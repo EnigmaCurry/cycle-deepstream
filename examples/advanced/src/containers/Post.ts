@@ -30,7 +30,12 @@ function view(postId, post: { title: string, content: string }, children, showRe
           h('li', h(`paper-icon-button#reply-${postId}`, { attrs: { icon: 'reply' } }))
         ]),
         h('div.replybox', { style: { display: showReplyBox ? 'block' : 'none' } }, [
-          h(`iron-autogrow-textarea#replybox-${postId}.textbox`, { attrs: { rows: 4, placeholder: 'Reply with your comment here' } }),
+          h(`iron-autogrow-textarea#replybox-${postId}.textbox`, {
+            attrs: { rows: 4, placeholder: 'Reply with your comment here' }, hook: {
+              //Autofocus the textarea:
+              insert: vnode => { (<HTMLElement>vnode.elm).querySelector('textarea').focus() }
+            }
+          }),
           h(`paper-button#send-${postId}.send`, { attrs: { raised: '' } }, "send"),
           h(`paper-button#cancel-${postId}.cancel`, { attrs: { raised: '' } }, "cancel")
         ]),

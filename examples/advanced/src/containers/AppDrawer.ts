@@ -74,6 +74,7 @@ function view(userData = null) {
             attrs: { raised: '' },
             hook: hooks
           }, 'settings')]),
+        div('.channel-list', [h('hr')])
       ]),
       div('.center', [
         h('hr'),
