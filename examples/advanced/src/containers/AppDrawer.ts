@@ -61,7 +61,7 @@ function view(userData = null) {
     // User logged in - profile text:
     // SIDE EFFECT: Turn off forceNarrow mode:
     appDrawerLayout.forceNarrow = false
-    return div('.app-drawer-content', [
+    return div('#app-drawer-content', [
       div([
         h('h1.center', `Hey ${userData.name}`),
         div([
@@ -86,7 +86,7 @@ function view(userData = null) {
     // SIDE EFFECT: Force app to narrow mode if we aren't logged in.
     // This effectively hides the redundant login message.
     appDrawerLayout.forceNarrow = true
-    return div('.app-drawer-content', [
+    return div('#app-drawer-content', [
       div('.center', [
         h('h1', "Don't you like the Beatles?"),
         h('paper-button#drawer-sign-in.sign-in.button', {

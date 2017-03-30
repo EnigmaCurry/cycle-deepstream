@@ -4,7 +4,7 @@
     margin-right: 1em;
 }
 
-.app-drawer-content {
+#app-drawer-content {
     .button {
         background-color: #78909C;
         color: #fff;
@@ -29,4 +29,16 @@
     hr {
         width: 90%;
     }
+}
+
+#app-drawer-footer {
+    position: fixed;
+    bottom: 120px;
+}
+
+iframe.ghstars {
+    width:130px;
+    height:30px;
+    margin: 5px;
+    border-style: none;
 }
