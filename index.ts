@@ -76,7 +76,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
     const emit = (data: Event) => {
-      logEvent(JSON.stringify(data))
+      logEvent(data)
       events.emit('deepstream-event', data)
     }
 
@@ -84,9 +84,13 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       if (debug)
         console.debug.apply(null, ['deepstream action:', ...msgs])
     }
-    function logEvent(...msgs: Array<string>) {
-      if (debug)
-        console.debug.apply(null, ['deepstream event:', ...msgs])
+    function logEvent(event: Object) {
+      if (event['error'] !== undefined) {
+        console.error('deepstream error:', JSON.stringify(event))
+      } else if (debug) {
+        console.debug('deepstream event:', JSON.stringify(event))
+      }
+
     }
 
     function getRecord(name: string): Promise<deepstreamIO.Record> {
