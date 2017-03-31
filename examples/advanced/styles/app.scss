@@ -18,7 +18,7 @@ app-header {
     text-align: center;
 }
 
-paper-card.post {
+.post-children paper-card.post {
     width: 100%;
 }
 .post .post-title {
@@ -41,7 +41,15 @@ paper-card.post textarea {
 .post-children paper-card {
     display: inline-block;
 }
-
+.post-children paper-card.post {
+    padding-left: 4px;
+}
+.post-children paper-card.post.even {
+    border-left: 2px dashed #bef;
+}
+.post-children paper-card.post.odd {
+    border-left: 2px dashed #bdb;
+}
 .post-children .post-title {
     display:none;
 }
