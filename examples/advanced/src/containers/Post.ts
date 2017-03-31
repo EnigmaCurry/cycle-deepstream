@@ -42,7 +42,7 @@ function view(postId, post: Post, children, showReplyBox = false) {
         ]),
         h('div.replybox', { style: { display: showReplyBox ? 'block' : 'none' } }, [
           h(`iron-autogrow-textarea#replybox-${postId}.textbox`, {
-            attrs: { rows: 4, placeholder: 'Reply with your comment here' }, hook: {
+            attrs: { rows: 4, placeholder: 'Reply with your markdown formatted comment here' }, hook: {
               //Autofocus the textarea:
               insert: vnode => { (<HTMLElement>vnode.elm).querySelector('textarea').focus() }
             }
