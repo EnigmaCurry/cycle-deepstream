@@ -13,7 +13,16 @@ import * as ds from '../../../../actions'
 
 const markdown = new Markdown()
 
-function view(postId, post: { title: string, content: string }, children, showReplyBox = false) {
+type Post = {
+  name: string,
+  parent: string,
+  root: string,
+  title: string | null,
+  content: string,
+  depth: number
+}
+
+function view(postId, post: Post, children, showReplyBox = false) {
   //Manually create a DOM element and corece it into a snabbdom VNode:
   const content = document.createElement('div.content')
   //Render post content from markdown to HTML:
@@ -21,7 +30,9 @@ function view(postId, post: { title: string, content: string }, children, showRe
   if (post.title === undefined && post.content === undefined) {
     return h('div', '[No post content found]')
   } else {
-    return h('paper-card.post', { key: uuid4() }, [
+    const alternateLineClass = post.depth % 2 === 0 ? '.even' : '.odd'
+    const rootClass = post.root === post.name ? '.root' : ''
+    return h(`paper-card.post${alternateLineClass}${rootClass}`, { key: uuid4() }, [
       h(`div.card-content.post#post-${postId}`, [
         h('div.post-title', post.title ? post.title : '[no title]'),
         toVNode(content),
@@ -130,7 +141,6 @@ export function Post(sources: Sources): Sinks {
   const submitReply$ = submitClick$
     .compose(sampleCombine(xs.combine(post$, replyText$)))
     .map(([click, [parent, replyText]]) => {
-      console.log(parent)
       return ds.rpc.make('create-post', {
         parent: parent.name,
         root: parent.root,

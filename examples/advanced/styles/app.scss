@@ -6,8 +6,8 @@ body {
 }
 
 #app-content {
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 app-header {
@@ -21,17 +21,25 @@ app-header {
 paper-card.post {
     width: 100%;
 }
-
-.card-content.post {
-    margin-bottom: 1em;
+.post .post-title {
+    font-size: 1.5em;
 }
-
+paper-card.post.root {
+}
+paper-card.post.odd {
+    background-color: #efe;
+}
+paper-card.post.even {
+    background-color: #e8f2ff;
+}
+paper-card.post textarea {
+    background-color: #fff !important;
+}
 .post-children {
-    margin-left: 1em;
+    margin-left: 0.4em;
 }
 .post-children paper-card {
     display: inline-block;
-    margin-bottom: 1em;
 }
 
 .post-children .post-title {
@@ -41,6 +49,7 @@ paper-card.post {
 ul.post-footer {
     margin-left: 0;
     padding-left: 0;
+    margin-bottom:0;
 }
 
 .post-footer li {
