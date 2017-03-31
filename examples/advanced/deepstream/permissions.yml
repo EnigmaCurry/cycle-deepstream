@@ -3,17 +3,17 @@ presence:
     allow: true
 record:
   "*":
-    create: true
-    write: true
+    create: true,
+    write: "user.data.role === 'admin'"
+    delete: "user.data.role === 'admin'"
     read: true
-    delete: true
-    listen: true
+    listen: false
 event:
   "*":
-    publish: true
+    publish: "user.data.role === 'admin'"
     subscribe: true
-    listen: true
+    listen: false
 rpc:
   "*":
-    provide: true
+    provide: "user.data.role === 'admin'"
     request: true

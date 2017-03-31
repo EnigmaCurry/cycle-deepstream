@@ -1,11 +1,11 @@
 admin:
   password: admin
   serverData:
-    groups:
-      - admin
+    role: admin
 john:
   password: john
   serverData:
+    role: user
     groups:
       - beatles
   clientData:
@@ -14,6 +14,7 @@ john:
 paul:
   password: paul
   serverData:
+    role: user
     groups:
       - beatles
   clientData:
@@ -22,6 +23,7 @@ paul:
 george:
   password: george
   serverData:
+    role: user
     groups:
       - beatles
   clientData:
@@ -30,6 +32,7 @@ george:
 ringo:
   password: ringo
   serverData:
+    role: user
     groups:
       - beatles
   clientData:
