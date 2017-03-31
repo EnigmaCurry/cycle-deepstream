@@ -3,7 +3,7 @@ presence:
     allow: true
 record:
   "*":
-    create: true,
+    create: true
     write: "user.data.role === 'admin'"
     delete: "user.data.role === 'admin'"
     read: true
