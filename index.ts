@@ -84,7 +84,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       if (debug)
         console.debug.apply(null, ['deepstream action:', ...msgs])
     }
-    function logEvent(event: Object) {
+    function logEvent(event: any) {
       if (event['error'] !== undefined) {
         console.error('deepstream error:', JSON.stringify(event))
       } else if (debug) {
