@@ -219,8 +219,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const recordSnapshotListener = recordSnapshot$.addListener({
       next: intent => {
         logAction(intent.action, intent.name)
-        client.record.snapshot(intent.name, (error, record) => {
-          emit({ event: 'record.snapshot', name: record.name, data: record.snapshot() })
+        client.record.snapshot(intent.name, (error, data) => {
+          emit({ event: 'record.snapshot', name: intent.name, data })
         })
       },
       error: () => { },
