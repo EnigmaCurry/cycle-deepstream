@@ -72,5 +72,6 @@ module.exports = {
       test: /\.html$/,
       loader: 'wc-loader'
     }]
-  }
+  },
+  devtool: __DEV__ ? 'eval-source-map' : 'source-map'
 }
