@@ -2,6 +2,7 @@ import { Driver } from '@cycle/run'
 import xs, { Stream } from 'xstream'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
+import * as stringify from 'json-stringify-safe'
 
 export type Intent = {
   action: string,
@@ -87,9 +88,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     function logEvent(event: any) {
       if (event['error'] !== undefined) {
-        console.error('deepstream error:', JSON.stringify(event))
+        console.error('deepstream error:', stringify(event))
       } else if (debug) {
-        console.debug('deepstream event:', JSON.stringify(event))
+        console.debug('deepstream event:', stringify(event))
       }
 
     }
@@ -173,7 +174,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           'record.delete': true,
           'record.error': true
         }, intent.events)
-        logAction(intent.action, intent.name, intent.events ? JSON.stringify(intent.events) : '')
+        logAction(intent.action, intent.name, intent.events ? stringify(intent.events) : '')
         getRecord(intent.name).then(record => {
           if (events['record.change']) {
             record.subscribe((data: Object) => {
@@ -304,7 +305,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           'list.entry-moved': true,
           'list.entry-removed': true
         }, intent.events)
-        logAction(intent.action, intent.name, intent.events ? JSON.stringify(intent.events) : '')
+        logAction(intent.action, intent.name, intent.events ? stringify(intent.events) : '')
         getList(intent.name).then(list => {
           // Is this the first time the subscription callback is called?
           let callbackFirstCall = true
@@ -445,7 +446,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       && intent.method !== undefined)
     const rpcMakeListener = rpcMake$.addListener({
       next: (intent: RPCIntent) => {
-        logAction(intent.action, intent.method, JSON.stringify(intent.data))
+        logAction(intent.action, intent.method, stringify(intent.data))
         client.rpc.make(intent.method, intent.data, (error, result) => {
           if (error) {
             throw new Error(error)
