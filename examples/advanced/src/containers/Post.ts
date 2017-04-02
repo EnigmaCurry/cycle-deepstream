@@ -67,12 +67,12 @@ function view(postId, post: Post, children, showReplyBox = false) {
 //  - Each Post is responsible for creating it's children containers and
 //    hooking it up to it's parent Post's sinks.
 export function Post(sources: Sources): Sinks {
-  const { DOM, deep$, props$ } = sources
+  const { DOM, deep$ } = sources
 
-  //DOM wrapper id - use this to differentiate different posts inside the DOM.
-  //Our IDs allow forward slashes, but the DOM doesn't, so replace those with '_':
-  const domID$ = props$
-    .map(props => props.id.replace(/\//g, '_'))
+  const props$ = sources.props$
+    //We need a DOM safe id that doesn't contain forward slashes.
+    //Replace those with underscore, just for use as tag ids:
+    .map(props => ({ ...props, domID: props.id.replace(/\//g, '_') }))
 
   // Deepstream requests to load the post data:
   const postRequest$ = xs.merge(
@@ -116,11 +116,11 @@ export function Post(sources: Sources): Sinks {
 
   const childPostsVdom$ = Collection.pluck(childPosts$, item => item.DOM)
 
-  const showReplyBox$ = domID$
-    .map(elemId => xs.merge(
-      DOM.select(`#reply-${elemId}`).events('click').mapTo(true),
-      DOM.select(`#cancel-${elemId}`).events('click').mapTo(false),
-      DOM.select(`#send-${elemId}`).events('click').mapTo(false)
+  const showReplyBox$ = props$
+    .map(props => xs.merge(
+      DOM.select(`#reply-${props.domID}`).events('click').mapTo(true),
+      DOM.select(`#cancel-${props.domID}`).events('click').mapTo(false),
+      DOM.select(`#send-${props.domID}`).events('click').mapTo(false)
     ))
     .flatten()
     .startWith(false)
@@ -149,8 +149,8 @@ export function Post(sources: Sources): Sinks {
       })
     })
 
-  const vdom$ = xs.combine(domID$, post$, childPostsVdom$, showReplyBox$)
-    .map(([domID, post, childrenDOM, showReplyBox]) => view(domID, post, childrenDOM, showReplyBox))
+  const vdom$ = xs.combine(props$, post$, childPostsVdom$, showReplyBox$)
+    .map(([props, post, childrenDOM, showReplyBox]) => view(props.domID, post, childrenDOM, showReplyBox))
 
   const childRequest$ = childPosts$
     .map(postList => xs.merge.apply(null, postList.map(post => post.deep$)))
