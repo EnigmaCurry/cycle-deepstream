@@ -2,7 +2,7 @@ import { Driver } from '@cycle/run'
 import xs, { Stream } from 'xstream'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
-import * as stringify from 'json-stringify-safe'
+const stringify = require('json-stringify-safe')
 
 export type Intent = {
   action: string,
