@@ -125,22 +125,14 @@ export function Post(sources: Sources): Sinks {
     .flatten()
     .startWith(false)
 
-  const replyText$ = domID$
-    .map(elemId => DOM.select(`#replybox-${elemId} textarea`)
-      .events('change')
-      .map(ev => (<HTMLTextAreaElement>ev.target).value))
-    .flatten()
-    .remember()
-
-  const submitClick$ = domID$
-    .map(elemId => DOM.select(`#send-${elemId}`)
+  const replyText$ = props$
+    .map(props => DOM.select(`#send-${props.domID}`)
       .events('click')
-      .mapTo(true))
+      .map(ev => (<Element>event.target).parentElement.querySelector('textarea').value))
     .flatten()
 
-  const submitReply$ = submitClick$
-    .compose(sampleCombine(xs.combine(post$, replyText$)))
-    .map(([click, [parent, replyText]]) => {
+  const submitReply$ = xs.combine(post$, replyText$)
+    .map(([parent, replyText]) => {
       return ds.rpc.make('create-post', {
         parent: parent.name,
         root: parent.root,
