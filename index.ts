@@ -220,7 +220,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         client.record.snapshot(intent.name, (error, record) => {
-          emit({ event: 'record.snapshot', name: record.name, data: record })
+          emit({ event: 'record.snapshot', name: record.name, data: record.snapshot() })
         })
       },
       error: () => { },
