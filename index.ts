@@ -100,8 +100,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           client.record.getRecord(name) : cachedRecords[name]
         record.on('error', (err: string) => reject(err))
         record.whenReady((record: deepstreamIO.Record) => {
-          cachedRecords[name] = record
-          resolve(record)
+          cachedRecords[name] = record.get()
+          resolve(record.get())
         })
       })
     }
