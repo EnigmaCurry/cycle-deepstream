@@ -2,7 +2,7 @@
 // There are just helper functions to help you build the objects that
 // the cycle driver interacts with.
 
-export function login(auth) {
+export function login(auth?: Object) {
   return { action: 'login', auth }
 }
 

@@ -65,14 +65,17 @@ export type Event = {
   isSubscribed?: boolean
 }
 
+export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>
+
 export function makeDeepstreamDriver({url, options = {}, debug = false}:
-  { url: string, options?: Object, debug?: boolean }): Driver<Stream<Intent>, Stream<Event>> {
+  { url: string, options?: Object, debug?: boolean }): CycleDeepstream {
 
   return function deepstreamDriver(action$) {
 
     let client: deepstreamIO.Client
     let cachedRecords: any = {}
     let cachedLists: any = {}
+    const log = console.debug === undefined ? console.log : console.debug
 
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
@@ -83,14 +86,14 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     function logAction(...msgs: Array<string>) {
       if (debug)
-        console.debug.apply(null, ['deepstream action:', ...msgs])
+        log.apply(null, ['deepstream action:', ...msgs])
     }
 
     function logEvent(event: any) {
       if (event['error'] !== undefined) {
         console.error('deepstream error:', stringify(event))
       } else if (debug) {
-        console.debug('deepstream event:', stringify(event))
+        log('deepstream event:', stringify(event))
       }
 
     }
@@ -129,7 +132,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         // Delete caches:
         cachedRecords = {}
         cachedLists = {}
-        client = (<any>window).ds = deepstream(url, options).login(
+        client = deepstream(url, options).login(
           intent.auth, (success: boolean, data: Object) => {
             if (success) {
               emit({ event: 'login.success', data })
