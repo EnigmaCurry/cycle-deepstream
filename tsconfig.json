@@ -11,7 +11,7 @@
     "sourceMap": true,
     "declaration": true
   },
-  "include": ["src/index.ts"],
+  "include": ["src/"],
   "types": ["mocha","chai"],
   "typeRoots": [
     "./node_modules/@types/mocha/index.d.ts",
