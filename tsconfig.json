@@ -12,8 +12,9 @@
     "declaration": true
   },
   "include": ["src/"],
-  "types": ["mocha","chai"],
+  "types": ["node","mocha","chai"],
   "typeRoots": [
+    "./node_modules/@types",
     "./node_modules/@types/mocha/index.d.ts",
     "./node_modules/deepstream.io-client.js/src/client.d.ts"
   ]
