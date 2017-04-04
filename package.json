@@ -7,15 +7,14 @@
   "scripts": {
     "dist": "rimraf dist && webpack",
     "postinstall": "npm run dist",
-    "test": "NODE_ENV=test mocha --compilers ts:ts-node/register index.spec.ts",
-    "coverage": "NODE_ENV=test nyc npm test",
+    "test": "NODE_ENV=test mocha --compilers ts:ts-node/register src/index.spec.ts",
     "test-watch": "npm run test -- -w",
     "simple": "cd examples/simple && npm install && npm run start",
     "advanced": "cd examples/advanced && npm install && npm run start"
   },
   "nyc": {
     "include": [
-      "index.ts"
+      "src/index.ts"
     ],
     "extension": [
       ".ts"

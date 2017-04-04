@@ -5,7 +5,7 @@ const __PROD__ = process.env.NODE_ENV === 'production'
 const __TEST__ = process.env.NODE_ENV === 'test'
 
 module.exports = {
-  entry: './index.ts',
+  entry: './src/index.ts',
   output: {
     filename: 'dist/index.js'
   },
