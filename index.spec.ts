@@ -2,47 +2,59 @@ import xs, { Stream } from 'xstream'
 import { expect } from 'chai'
 import { makeDeepstreamDriver, CycleDeepstream, Intent, Event } from './index'
 import * as actions from './actions'
-import { mockTimeSource } from '@cycle/time'
+import { mockTimeSource, MockTimeSource } from '@cycle/time'
 
 const Deepstream = require('deepstream.io')
 const portastic = require('portastic')
 
-describe('cycle-deepstream', () => {
-  let server: any, port: number
+const waitForStream = (stream: Stream<any>) => {
+  return new Promise((resolve, reject) => {
+    stream.addListener({ complete: () => resolve(), error: (err) => reject(err) })
+  })
+}
 
-  beforeEach('start deepstream test server', (next: Function) => {
+describe('cycle-deepstream', () => {
+  let server: any, driver: CycleDeepstream
+
+  before('start deepstream server', (next) => {
     portastic.find({ min: 6020, max: 6030 }).then((ports: Array<number>) => {
-      port = ports[0]
-      server = new Deepstream({ port })
+      server = new Deepstream({ port: ports[0] })
       server.on('started', () => {
         expect(server.isRunning()).to.be.true
+        driver = makeDeepstreamDriver(
+          { url: `localhost:${ports[0]}`, options: { maxReconnectAttempts: 0 }, debug: true })
         next()
       })
       server.start()
     })
   })
 
-  afterEach('stop deepstream server', next => {
-    server.on('stopped', () => {
+  it('must login', next => {
+    const time = mockTimeSource()
+    const login$ = time.diagram('x|', { x: actions.login() })
+    const loginResponse$ = driver(login$)
+      .filter(evt => evt.event === 'login.success')
+      .take(1)
+    const loginExpected$ = time.diagram('e|', { e: { event: 'login.success' } })
+    waitForStream(loginResponse$).then(() => {
+      time.assertEqual(loginResponse$, loginExpected$)
       next()
     })
-    server.stop()
+    time.run()
   })
 
-  it('must login', next => {
-    const Time = mockTimeSource()
-    const driver = makeDeepstreamDriver(
-      { url: `localhost:${port}`, debug: true })
-
-    const action$ = Time.diagram('x|', { x: actions.login() })
-    const result$ = driver(action$).take(1)
-    const expected$ = Time.diagram('e|', { e: { event: 'login.success' } })
-    result$.addListener({
-      complete: () => {
-        Time.assertEqual(result$, expected$)
-        next()
-      }
+  it('must logout', next => {
+    const time = mockTimeSource()
+    const logout$ = time.diagram('x|', { x: actions.logout() })
+    const logoutResponse$ = driver(logout$)
+      .filter(evt => evt.event === 'logout')
+      .take(1)
+    const logoutExpected$ = time.diagram('e|', { e: { event: 'logout' } })
+    waitForStream(logoutResponse$).then(() => {
+      time.assertEqual(logoutResponse$, logoutExpected$)
+      next()
     })
-    Time.run()
+    time.run()
   })
+
 })

@@ -9,14 +9,24 @@
     "postinstall": "npm run dist",
     "test": "NODE_ENV=test mocha --compilers ts:ts-node/register index.spec.ts",
     "coverage": "NODE_ENV=test nyc npm test",
+    "test-watch": "npm run test -- -w",
     "simple": "cd examples/simple && npm install && npm run start",
     "advanced": "cd examples/advanced && npm install && npm run start"
   },
   "nyc": {
-    "include": ["index.ts"],
-    "extension":[".ts"],
-    "require": ["ts-node/register"],
-    "reporter":["json","html"]
+    "include": [
+      "index.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "json",
+      "html"
+    ]
   },
   "keywords": [
     "cyclejs",
@@ -33,8 +43,10 @@
     "deepstream.io": "^2.1.6",
     "file-loader": "^0.10.1",
     "mocha": "^3.2.0",
+    "npm-run-all": "^4.0.2",
     "nyc": "^10.2.0",
     "portastic": "^1.0.1",
+    "reload": "^1.1.1",
     "rimraf": "^2.6.1",
     "ts-loader": "^2.0.3",
     "ts-node": "^3.0.2",
