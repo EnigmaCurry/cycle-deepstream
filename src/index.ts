@@ -1,5 +1,7 @@
 import { Driver } from '@cycle/run'
 import xs, { Stream } from 'xstream'
+import fromEvent from 'xstream/extra/fromEvent'
+import concat from 'xstream/extra/concat'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
 const stringify = require('json-stringify-safe')
@@ -70,13 +72,12 @@ export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>
 export function makeDeepstreamDriver({url, options = {}, debug = false}:
   { url: string, options?: Object, debug?: boolean }): CycleDeepstream {
 
+  let client: deepstreamIO.Client
+  let cachedRecords: any = {}
+  let cachedLists: any = {}
+  const log = console.debug === undefined ? console.log : console.debug
+
   return function deepstreamDriver(action$) {
-
-    let client: deepstreamIO.Client
-    let cachedRecords: any = {}
-    let cachedLists: any = {}
-    const log = console.debug === undefined ? console.log : console.debug
-
     // Internal event emitter to delegate between action 
     const events = new EventEmitter()
     const emit = (data: Event) => {
@@ -95,7 +96,6 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       } else if (debug) {
         log('deepstream event:', stringify(event))
       }
-
     }
 
     function getRecord(name: string): Promise<deepstreamIO.Record> {
@@ -239,7 +239,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: (intent: RecordSetIntent) => {
         logAction(intent.action, intent.name)
         getRecord(intent.name).then(record => {
-          if (typeof intent.path === undefined) {
+          if (typeof intent.path === 'undefined') {
             record.set(intent.data)
           } else {
             record.set(intent.path, intent.data)
@@ -461,13 +461,6 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       complete: () => { }
     })
 
-    return <Stream<Event>>xs.create({
-      start: listener => {
-        events.on('deepstream-event', (event: Event) => {
-          listener.next(event)
-        })
-      },
-      stop: () => { }
-    })
+    return fromEvent(events, 'deepstream-event')
   }
 }

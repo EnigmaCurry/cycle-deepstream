@@ -11,7 +11,10 @@ export function logout() {
 }
 
 export const record = {
-  subscribe: (record: string, events = {}) => ({ action: 'record.subscribe', name: record, events: events })
+  subscribe: (record: string, events = {}) => ({ action: 'record.subscribe', name: record, events: events }),
+  snapshot: (record: string) => ({ action: 'record.snapshot', name: record }),
+  get: (record: string) => ({ action: 'record.get', name: record }),
+  set: (record: string, data: Object) => ({ action: 'record.set', name: record, data })
 }
 
 export const list = {

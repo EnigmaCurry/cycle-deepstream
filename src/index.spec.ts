@@ -1,17 +1,30 @@
 import xs, { Stream } from 'xstream'
-import { expect } from 'chai'
+import * as chai from 'chai'
 import { makeDeepstreamDriver, CycleDeepstream, Intent, Event } from './index'
 import * as actions from './actions'
-import { mockTimeSource, MockTimeSource } from '@cycle/time'
 
+const expect = chai.expect
 const Deepstream = require('deepstream.io')
 const portastic = require('portastic')
 
-const waitForStream = (stream: Stream<any>) => {
+const consumeStream = (stream: Stream<any>): Promise<Array<any>> => {
+  const values: Array<any> = []
   return new Promise((resolve, reject) => {
-    stream.addListener({ complete: () => resolve(), error: (err) => reject(err) })
+    stream.addListener({
+      next: i => values.push(i),
+      complete: () => resolve(values),
+      error: err => reject(err)
+    })
   })
 }
+
+const expectStreamValues = (stream: Stream<any>, expected: Array<any>, next: MochaDone) => {
+  consumeStream(stream).then(values => {
+    expect(values).to.deep.equal(expected)
+    next()
+  }).catch(err => next(err))
+}
+
 
 describe('cycle-deepstream', () => {
   let server: any, driver: CycleDeepstream
@@ -30,31 +43,30 @@ describe('cycle-deepstream', () => {
   })
 
   it('must login', next => {
-    const time = mockTimeSource()
-    const login$ = time.diagram('x|', { x: actions.login() })
-    const loginResponse$ = driver(login$)
-      .filter(evt => evt.event === 'login.success')
-      .take(1)
-    const loginExpected$ = time.diagram('e|', { e: { event: 'login.success' } })
-    waitForStream(loginResponse$).then(() => {
-      time.assertEqual(loginResponse$, loginExpected$)
-      next()
-    })
-    time.run()
+    const action$ = xs.of(actions.login())
+    const actual$ = driver(action$).filter(evt => evt.event === 'login.success').take(1)
+    const expected: any = [{ event: 'login.success', data: null }]
+    expectStreamValues(actual$, expected, next)
   })
 
-  it('must logout', next => {
-    const time = mockTimeSource()
-    const logout$ = time.diagram('x|', { x: actions.logout() })
-    const logoutResponse$ = driver(logout$)
-      .filter(evt => evt.event === 'logout')
-      .take(1)
-    const logoutExpected$ = time.diagram('e|', { e: { event: 'logout' } })
-    waitForStream(logoutResponse$).then(() => {
-      time.assertEqual(logoutResponse$, logoutExpected$)
-      next()
-    })
-    time.run()
+  it('sets record', next => {
+    const action$ = xs.of(actions.record.set('record1', { foo: 'bar' }))
+    const actual$ = driver(action$)
+    next()
+  })
+
+  it('retrieves a record', next => {
+    const action$ = xs.of(actions.record.get('record1'))
+    const actual$ = driver(action$).take(1)
+    const expected = [{ event: 'record.get', name: 'record1', data: { foo: 'bar' } }]
+    expectStreamValues(actual$, expected, next)
+  })
+
+  it('retrieves a snapshot', next => {
+    const action$ = xs.of(actions.record.snapshot('record1'))
+    const actual$ = driver(action$).take(1)
+    const expected = [{ event: 'record.snapshot', name: 'record1', data: { foo: 'bar' } }]
+    expectStreamValues(actual$, expected, next)
   })
 
 })
