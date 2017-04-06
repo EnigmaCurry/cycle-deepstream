@@ -7,7 +7,7 @@
   "scripts": {
     "dist": "rimraf dist && webpack",
     "postinstall": "npm run dist",
-    "test": "NODE_ENV=test mocha --compilers ts:ts-node/register src/**/*.spec.ts",
+    "test": "NODE_ENV=test mocha --trace-warnings --compilers ts:ts-node/register src/**/*.spec.ts",
     "test-watch": "npm run test -- -w",
     "coverage": "NODE_ENV=test nyc npm test",
     "coverage-reload": "reload -d coverage -b",

@@ -78,11 +78,18 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
   const log = console.debug === undefined ? console.log : console.debug
 
   return function deepstreamDriver(action$) {
-    // Internal event emitter to delegate between action 
-    const events = new EventEmitter()
+    // Internal event emitter to delegate between action and response 
+    const deepstreamEvents = new EventEmitter()
+
+    // The stream of events we will return from this driver:
+    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event')
+
     const emit = (data: Event) => {
       logEvent(data)
-      events.emit('deepstream-event', data)
+      if (deepstreamEvents.listenerCount('deepstream-event') === 0) {
+        throw new Error('Failure to emit deepstream-event - there are no listeners to receive the event')
+      }
+      deepstreamEvents.emit('deepstream-event', data)
     }
 
     function logAction(...msgs: Array<string>) {
@@ -461,6 +468,6 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       complete: () => { }
     })
 
-    return fromEvent(events, 'deepstream-event')
+    return response$
   }
 }

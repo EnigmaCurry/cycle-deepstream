@@ -55,14 +55,14 @@ describe('cycle-deepstream', () => {
     next()
   })
 
-  it('retrieves a record', next => {
+  it('record.get retrieves a record', next => {
     const action$ = xs.of(actions.record.get('record1'))
     const actual$ = driver(action$).take(1)
     const expected = [{ event: 'record.get', name: 'record1', data: { foo: 'bar' } }]
     expectStreamValues(actual$, expected, next)
   })
 
-  it('retrieves a snapshot', next => {
+  it('record.snapshot retreives a record snapshot', next => {
     const action$ = xs.of(actions.record.snapshot('record1'))
     const actual$ = driver(action$).take(1)
     const expected = [{ event: 'record.snapshot', name: 'record1', data: { foo: 'bar' } }]
