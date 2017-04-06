@@ -82,13 +82,15 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const deepstreamEvents = new EventEmitter()
 
     // The stream of events we will return from this driver:
-    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event')
+    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event').remember()
+    // Log the events that the output stream sees
+    // This also ensures that the stream is created now, and ensures
+    // emitted events have a valid listener.
+    response$.addListener({
+      next: i => logEvent(i)
+    })
 
     const emit = (data: Event) => {
-      logEvent(data)
-      if (deepstreamEvents.listenerCount('deepstream-event') === 0) {
-        throw new Error('Failure to emit deepstream-event - there are no listeners to receive the event')
-      }
       deepstreamEvents.emit('deepstream-event', data)
     }
 
