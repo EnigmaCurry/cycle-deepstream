@@ -181,6 +181,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const recordSubscriptionListener = recordSubscription$.addListener({
       next: (intent: SubscribeIntent) => {
         const events = Object.assign({
+          //record.existing will fire record.change for existing values on subscribe
+          'record.existing': true,
           'record.change': true,
           'record.discard': true,
           'record.delete': true,
@@ -191,7 +193,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           if (events['record.change']) {
             record.subscribe((data: Object) => {
               emit({ event: 'record.change', name: record.name, data: data })
-            }, true)
+            }, events['record.existing'])
           }
           if (events['record.discard']) {
             record.on('discard', () => {
