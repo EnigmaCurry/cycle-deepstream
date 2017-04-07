@@ -69,6 +69,6 @@
     "deepstream.io-client-js": "github:deepstreamio/deepstream.io-client-js",
     "events": "^1.1.1",
     "json-stringify-safe": "^5.0.1",
-    "xstream": "^10.0.0"
+    "xstream": "^10.5.0"
   }
 }

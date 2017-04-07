@@ -11,7 +11,8 @@
     "sourceMap": true,
     "declaration": true
   },
-  "include": ["src/"],
+  "include": ["src"],
+  "exclude": ["node_modules"],
   "types": ["node","mocha","chai"],
   "typeRoots": [
     "./node_modules/@types",
