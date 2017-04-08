@@ -23,40 +23,22 @@ const consumeStream = (stream: Stream<any>): Promise<Array<any>> => {
   })
 }
 
-const expectStreamValues = (stream: Stream<any>, expected: Array<any>, next?: MochaDone) => {
-  consumeStream(stream).then(values => {
-    //console.log('Completed stream values:', values)
-    expect(values).to.deep.equal(expected)
-    if (next !== undefined) {
-      next()
-    }
-  }).catch(err => {
-    if (next !== undefined) {
-      next(err)
-    } else {
-      throw new Error(err)
-    }
-  })
-}
-
-const safelyCloseDeepstream = (client: deepstreamIO.Client, callback?: Function) => {
-  // Deepstream client has known issues with close() - there are
-  // currently no guarantees that actions requested before close will
-  // actually occur. We can get around this by adding a record get
-  // call before close, as client requests are done sequentially, and
-  // will allow the previous call to finish before we call close.
-  client.record.getRecord('safelyCloseDeepstream').whenReady((record: deepstreamIO.Record) => {
-    record.set({ stuff: client.getUid() }, err => {
-      client.close()
-      if (callback !== undefined) {
-        callback()
-      }
-    })
+const expectStreamValues = (stream: Stream<any>, expected: Array<any>) => {
+  return new Promise((resolve, reject) => {
+    consumeStream(stream).then(values => {
+      //console.log('Completed stream values:', values)
+      expect(values).to.deep.equal(expected)
+      resolve()
+    }).catch(err => reject(err))
   })
 }
 
 describe('cycle-deepstream', () => {
-  let server: any, driver: CycleDeepstream, url: string
+  let server: any, url: string, client: deepstreamIO.Client
+  // action$ is requests to deepstream - shamefully sent next elements through the tests
+  // deep$ is events coming from deepstream
+  const action$ = xs.never()
+  let deep$: Stream<Event>
 
   before('start deepstream server', (next) => {
     portastic.find({ min: 6020, max: 6030 }).then((ports: Array<number>) => {
@@ -64,74 +46,141 @@ describe('cycle-deepstream', () => {
       server = new Deepstream({ port: ports[0] })
       server.on('started', () => {
         expect(server.isRunning()).to.be.true
-        driver = makeDeepstreamDriver(
-          { url, options: { maxReconnectAttempts: 0 }, debug: true })
+        deep$ = makeDeepstreamDriver(
+          { url, options: { maxReconnectAttempts: 0 }, debug: true })(action$)
+        client = deepstream(url).login()
         next()
       })
       server.start()
     })
   })
 
-  it('must login', next => {
-    const action$ = xs.of(actions.login())
-    const actual$ = driver(action$).filter(evt => evt.event === 'login.success').take(1)
-    const expected: any = [{ event: 'login.success', data: null }]
-    expectStreamValues(actual$, expected, next)
+  it('must login to deepstream', next => {
+    const login$ = deep$
+      .filter(evt => evt.event === 'login.success')
+      .take(1)
+    expectStreamValues(login$, [{ event: 'login.success', data: null }])
+      .then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.login())
   })
 
-  it('sets record', next => {
-    const action$ = xs.of(actions.record.set('record1', { foo: 'bar' }))
-    const actual$ = driver(action$)
-    next()
+  it('must subscribe to records', next => {
+    const subscribe$ = deep$
+      .filter(evt => evt.event === 'record.change')
+      .take(6)
+    expectStreamValues(subscribe$, [
+      { event: 'record.change', name: 'recordToModify', data: {} },
+      { event: 'record.change', name: 'recordToDiscard', data: {} },
+      { event: 'record.change', name: 'recordToDelete', data: {} },
+      { event: 'record.change', name: 'listitem1', data: {} },
+      { event: 'record.change', name: 'listitem2', data: {} },
+      { event: 'record.change', name: 'listitem3', data: {} }
+    ])
+      .then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.record.subscribe('recordToModify'))
+    action$
+      .shamefullySendNext(actions.record.subscribe('recordToDiscard'))
+    action$
+      .shamefullySendNext(actions.record.subscribe('recordToDelete'))
+    action$
+      .shamefullySendNext(actions.record.subscribe('listitem1'))
+    action$
+      .shamefullySendNext(actions.record.subscribe('listitem2'))
+    action$
+      .shamefullySendNext(actions.record.subscribe('listitem3'))
   })
 
-  it('record.get retrieves a record', next => {
-    const action$ = xs.of(actions.record.get('record1'))
-    const actual$ = driver(action$).take(1)
-    const expected = [{ event: 'record.get', name: 'record1', data: { foo: 'bar' } }]
-    expectStreamValues(actual$, expected, next)
-  })
-
-  it('record.snapshot retreives a record snapshot', next => {
-    const action$ = xs.of(actions.record.snapshot('record1'))
-    const actual$ = driver(action$).take(1)
-    const expected = [{ event: 'record.snapshot', name: 'record1', data: { foo: 'bar' } }]
-    expectStreamValues(actual$, expected, next)
-  })
-
-  it('record.subscribe receives events', next => {
-    const action$ = xs.of(actions.record.subscribe('record1'))
-    const event$ = driver(action$).take(3)
-    const expected: Array<any> = [
-      // Initial change event that fires automatically on subscribe
-      { event: 'record.change', name: 'record1', data: { foo: 'bar' } },
-      // Client set data event:
-      { event: 'record.change', name: 'record1', data: { foo: 'bar2' } },
-      // Client delete record event:
-      { event: 'record.delete', name: 'record1' }
-    ]
-    const actual: Array<any> = []
-    event$.addListener({
-      next: (evt) => {
-        console.log('EVENT ----- ', evt)
-        actual.push(evt)
-        if (actual.length === expected.length) {
-          expect(actual).to.deep.equal(expected)
-          next()
-        }
-      }
-    })
-    // Once we are subscribed, login with another client and
-    // manipulate the record to trigger events:
-    event$.take(1).addListener({
-      complete: () => {
-        const client = deepstream(url).login()
-        client.record.getRecord('record1').whenReady((record: deepstreamIO.Record) => {
-          record.set('foo', 'bar2', err => {
-            record.delete()
-          })
-        })
-      }
+  it('must respond to changing records', next => {
+    const recordChange$ = deep$
+      .filter(evt => evt.event === 'record.change')
+      .take(3)
+    expectStreamValues(recordChange$, [
+      { event: 'record.change', name: 'recordToModify', data: { foo: 'bar' } },
+      { event: 'record.change', name: 'recordToModify', data: { foo: 'bar', thing: 'fling' } },
+      { event: 'record.change', name: 'recordToModify', data: { foo: 'bar', thing: 3 } },
+    ]).then(next)
+      .catch(next)
+    //Modify the record to fire record.change:
+    client.record.getRecord('recordToModify').whenReady((record: deepstreamIO.Record) => {
+      record.set({ foo: 'bar' })
+      record.set('thing', 'fling')
+      record.set('thing', 3)
     })
   })
+
+  it('must respond to discarding records', next => {
+    const recordDiscard$ = deep$
+      .filter(evt => evt.event === 'record.discard')
+      .take(1)
+    expectStreamValues(recordDiscard$, [{ event: 'record.discard', name: 'recordToDiscard' }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.discard('recordToDiscard'))
+  })
+
+  it('must respond to deleting records', next => {
+    const recordDelete$ = deep$
+      .filter(evt => evt.event === 'record.delete')
+      .take(1)
+    expectStreamValues(recordDelete$, [{ event: 'record.delete', name: 'recordToDelete' }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.delete('recordToDelete'))
+  })
+
+  it('must logout from deepstream', next => {
+    const logout$ = deep$
+      .filter(evt => evt.event === 'logout')
+      .take(1)
+    expectStreamValues(logout$, [{ event: 'logout' }])
+      .then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.logout())
+  })
+
+  it('must support login again after logout', next => {
+    const login$ = deep$
+      .filter(evt => evt.event === 'login.success')
+      .take(1)
+    expectStreamValues(login$, [{ event: 'login.success', data: null }])
+      .then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.login())
+  })
+
+  it('must subscribe to lists', next => {
+    const subscribe$ = deep$
+      .filter(evt => evt.event === 'list.change')
+      .take(1)
+    expectStreamValues(subscribe$, [{ event: 'list.change', name: 'list1', data: [] }])
+      .then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.list.subscribe('list1'))
+  })
+
+  it('must respond to adding things to a list', next => {
+    const listEntryAdded$ = deep$
+      .filter(evt => evt.event === 'list.entry-added')
+      .take(3)
+    expectStreamValues(listEntryAdded$, [
+      { event: 'list.entry-added', name: 'list1', entry: 'listitem1', position: 0 },
+      { event: 'list.entry-added', name: 'list1', entry: 'listitem2', position: 1 },
+      { event: 'list.entry-added', name: 'list1', entry: 'listitem3', position: 2 }
+    ]).then(next)
+      .catch(next)
+    action$
+      .shamefullySendNext(actions.list.addEntry('list1', 'listitem1'))
+    action$
+      .shamefullySendNext(actions.list.addEntry('list1', 'listitem2'))
+    action$
+      .shamefullySendNext(actions.list.addEntry('list1', 'listitem3'))
+  })
+
 })

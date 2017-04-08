@@ -82,7 +82,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const deepstreamEvents = new EventEmitter()
 
     // The stream of events we will return from this driver:
-    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event').remember()
+    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event')
     // Log the events that the output stream sees
     // This also ensures that the stream is created now, and ensures
     // emitted events have a valid listener.
@@ -101,6 +101,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
     function logEvent(event: any) {
       if (event['error'] !== undefined) {
+        /* istanbul ignore next */
         console.error('deepstream error:', stringify(event))
       } else if (debug) {
         log('deepstream event:', stringify(event))
@@ -111,7 +112,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       return new Promise((resolve, reject) => {
         const record = cachedRecords[name] === undefined ?
           client.record.getRecord(name) : cachedRecords[name]
-        record.on('error', (err: string) => reject(err))
+        record.on('error', /* istanbul ignore next */(err: string) => reject(err))
         record.whenReady((record: deepstreamIO.Record) => {
           cachedRecords[name] = record
           resolve(record)
@@ -130,6 +131,9 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         })
       })
     }
+
+    /* istanbul ignore next */
+    const noop = () => { }
 
     const login$ = action$.filter(intent => intent.action === 'login')
     const loginListener = login$.addListener({
@@ -156,8 +160,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           emit({ event: 'connection.state', state })
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const logout$ = action$.filter(intent => intent.action === 'logout')
@@ -172,8 +176,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         }
         emit({ event: 'logout' })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordSubscription$ = action$.filter(intent => intent.action === 'record.subscribe'
@@ -212,8 +216,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           }
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordGet$ = action$.filter(intent => intent.action === 'record.get'
@@ -225,8 +229,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           emit({ event: 'record.get', name: record.name, data: record.get() })
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordSnapshot$ = action$.filter(intent => intent.action === 'record.snapshot'
@@ -238,8 +242,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           emit({ event: 'record.snapshot', name: intent.name, data })
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
 
@@ -257,8 +261,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           }
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordDelete$ = action$.filter(intent => intent.action === 'record.delete'
@@ -272,8 +276,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           delete cachedRecords[record.name]
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordDiscard$ = action$.filter(intent => intent.action === 'record.discard'
@@ -287,8 +291,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           delete cachedRecords[record.name]
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const recordListen$ = action$.filter(intent => intent.action === 'record.listen'
@@ -301,8 +305,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           emit({ event: 'record.listen', match, isSubscribed })
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listSubscription$ = action$.filter(intent => intent.action === 'list.subscribe'
@@ -367,8 +371,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           }
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listGetEntries$ = action$.filter(intent => intent.action === 'list.getEntries'
@@ -380,8 +384,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           emit({ event: 'list.getEntries', name: list.name, data: list.getEntries() })
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listSetEntries$ = action$.filter(intent => intent.action === 'list.setEntries'
@@ -394,8 +398,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           list.setEntries(intent.entries)
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listAddEntry$ = action$.filter(intent => intent.action === 'list.addEntry'
@@ -408,8 +412,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           list.addEntry(intent.entry, intent.index)
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listRemoveEntry$ = action$.filter(intent => intent.action === 'list.removeEntry'
@@ -422,8 +426,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           list.removeEntry(intent.entry, intent.index)
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listDelete$ = action$.filter(intent => intent.action === 'list.delete'
@@ -437,8 +441,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           delete cachedLists[list.name]
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const listDiscard$ = action$.filter(intent => intent.action === 'list.discard'
@@ -452,8 +456,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           delete cachedLists[list.name]
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     const rpcMake$ = action$.filter((intent: RPCIntent) => intent.action === 'rpc.make'
@@ -468,8 +472,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           // TODO how to link the rpc response to the original request? new ID?
         })
       },
-      error: () => { },
-      complete: () => { }
+      error: noop,
+      complete: noop
     })
 
     return response$
