@@ -23,6 +23,7 @@ export const record = {
 export const list = {
   subscribe: (list: string, events = {}) => ({ action: 'list.subscribe', name: list, events: events }),
   getEntries: (list: string) => ({ action: 'list.getEntries', name: list }),
+  setEntries: (list: string, entries: Array<any>) => ({ action: 'list.setEntries', name: list, entries }),
   addEntry: (list: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: list, entry, index }),
   removeEntry: (list: string, entry: string) => ({ action: 'list.removeEntry', name: list, entry }),
   discard: (list: string) => ({ action: 'list.discard', name: list }),

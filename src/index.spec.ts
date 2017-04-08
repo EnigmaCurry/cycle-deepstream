@@ -250,14 +250,24 @@ describe('cycle-deepstream', () => {
     action$.shamefullySendNext(actions.list.getEntries('list1'))
   })
 
+  it('must set list entries', next => {
+    const listSetEntries$ = deep$
+      .filter(evt => evt.event === 'list.change')
+      .take(1)
+    expectStreamValues(listSetEntries$, [
+      { event: 'list.change', name: 'list1', data: ['listitem1', 'listitem2'] }
+    ]).then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.list.setEntries('list1', ['listitem1', 'listitem2']))
+  })
+
   it('must get existing list entries on new subscribe', next => {
     const subscribe$ = deep$
       .filter(evt => evt.event === 'list.entry-existing')
-      .take(3)
+      .take(2)
     expectStreamValues(subscribe$, [
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 0 },
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem3', position: 1 },
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem4', position: 2 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem1', position: 0 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 1 }
     ])
       .then(next)
       .catch(next)
@@ -278,11 +288,10 @@ describe('cycle-deepstream', () => {
   it('must respond to deleting a list', next => {
     const subscribe$ = deep$
       .filter(evt => evt.event === 'list.entry-existing')
-      .take(3)
+      .take(2)
     expectStreamValues(subscribe$, [
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 0 },
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem3', position: 1 },
-      { event: 'list.entry-existing', name: 'list1', entry: 'listitem4', position: 2 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem1', position: 0 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 1 }
     ])
       .catch(next)
     const delete$ = deep$
