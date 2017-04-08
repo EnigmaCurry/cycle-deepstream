@@ -20,10 +20,12 @@ export const record = {
 }
 
 export const list = {
-  subscribe: (record: string, events = {}) => ({ action: 'list.subscribe', name: record, events: events }),
-  getEntries: (record: string) => ({ action: 'list.getEntries', name: record }),
-  addEntry: (record: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: record, entry, index }),
-  removeEntry: (record: string, entry: string) => ({ action: 'list.removeEntry', name: record, entry })
+  subscribe: (list: string, events = {}) => ({ action: 'list.subscribe', name: list, events: events }),
+  getEntries: (list: string) => ({ action: 'list.getEntries', name: list }),
+  addEntry: (list: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: list, entry, index }),
+  removeEntry: (list: string, entry: string) => ({ action: 'list.removeEntry', name: list, entry }),
+  discard: (list: string) => ({ action: 'list.discard', name: list })
+
 }
 
 export const rpc = {

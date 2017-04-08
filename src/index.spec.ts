@@ -189,19 +189,14 @@ describe('cycle-deepstream', () => {
   })
 
   it('must respond to removing things in a list', next => {
-    client.record.getList('list1').whenReady((list: deepstreamIO.List) => {
-      list.on('entry-removed', (entry: string, position: number) => {
-        console.log('ENTRY REMOVED', entry, position)
-      })
-      const listEntryRemoved$ = deep$
-        .filter(evt => evt.event === 'list.entry-removed')
-        .take(1)
-      expectStreamValues(listEntryRemoved$, [
-        { event: 'list.entry-removed', name: 'list1', entry: 'listitem1', position: 0 }
-      ]).then(next)
-        .catch(next)
-      action$.shamefullySendNext(actions.list.removeEntry('list1', 'listitem1'))
-    })
+    const listEntryRemoved$ = deep$
+      .filter(evt => evt.event === 'list.entry-removed')
+      .take(1)
+    expectStreamValues(listEntryRemoved$, [
+      { event: 'list.entry-removed', name: 'list1', entry: 'listitem1', position: 0 }
+    ]).then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.list.removeEntry('list1', 'listitem1'))
   })
 
   it('must get list entries', next => {
@@ -228,5 +223,15 @@ describe('cycle-deepstream', () => {
       .catch(next)
     action$
       .shamefullySendNext(actions.list.subscribe('list1'))
+  })
+
+  it('must respond to discarding lists', next => {
+    const listDiscard$ = deep$
+      .filter(evt => evt.event === 'list.discard')
+      .take(1)
+    expectStreamValues(listDiscard$, [{ event: 'list.discard', name: 'list1' }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.list.discard('list1'))
   })
 })

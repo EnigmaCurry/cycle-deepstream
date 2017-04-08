@@ -436,8 +436,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
-          list.unsubscribe()
           list.delete()
+          list.unsubscribe()
           delete cachedLists[list.name]
         })
       },
@@ -451,7 +451,6 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
-          list.unsubscribe()
           list.discard()
           delete cachedLists[list.name]
         })
