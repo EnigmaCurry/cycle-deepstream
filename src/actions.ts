@@ -24,8 +24,8 @@ export const list = {
   getEntries: (list: string) => ({ action: 'list.getEntries', name: list }),
   addEntry: (list: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: list, entry, index }),
   removeEntry: (list: string, entry: string) => ({ action: 'list.removeEntry', name: list, entry }),
-  discard: (list: string) => ({ action: 'list.discard', name: list })
-
+  discard: (list: string) => ({ action: 'list.discard', name: list }),
+  delete: (list: string) => ({ action: 'list.delete', name: list })
 }
 
 export const rpc = {

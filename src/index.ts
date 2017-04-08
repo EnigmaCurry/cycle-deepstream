@@ -437,7 +437,6 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
           list.delete()
-          list.unsubscribe()
           delete cachedLists[list.name]
         })
       },

@@ -234,4 +234,29 @@ describe('cycle-deepstream', () => {
       .catch(next)
     action$.shamefullySendNext(actions.list.discard('list1'))
   })
+
+  it('must respond to deleting a list', next => {
+    const subscribe$ = deep$
+      .filter(evt => evt.event === 'list.entry-existing')
+      .take(3)
+    expectStreamValues(subscribe$, [
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 0 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem3', position: 1 },
+      { event: 'list.entry-existing', name: 'list1', entry: 'listitem4', position: 2 },
+    ])
+      .catch(next)
+    const delete$ = deep$
+      .filter(evt => evt.event === 'list.delete')
+      .take(1)
+    expectStreamValues(delete$, [{ event: 'list.delete', name: 'list1' }])
+      .then(next)
+      .catch(next)
+
+    action$
+      .shamefullySendNext(actions.list.subscribe('list1'))
+    action$
+      .shamefullySendNext(actions.list.delete('list1'))
+  })
+
+
 })
