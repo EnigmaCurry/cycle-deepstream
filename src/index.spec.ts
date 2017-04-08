@@ -166,14 +166,17 @@ describe('cycle-deepstream', () => {
   })
 
   it('must respond to adding things to a list', next => {
-    const listEntryAdded$ = deep$
-      .filter(evt => evt.event === 'list.entry-added')
-      .take(3)
-    expectStreamValues(listEntryAdded$, [
+    const expected = [
       { event: 'list.entry-added', name: 'list1', entry: 'listitem1', position: 0 },
       { event: 'list.entry-added', name: 'list1', entry: 'listitem2', position: 1 },
-      { event: 'list.entry-added', name: 'list1', entry: 'listitem3', position: 2 }
-    ]).then(next)
+      { event: 'list.entry-added', name: 'list1', entry: 'listitem3', position: 2 },
+      { event: 'list.entry-added', name: 'list1', entry: 'listitem4', position: 3 }]
+    const listEntryAdded$ = deep$
+      .filter(evt => evt.event === 'list.entry-added')
+      .take(expected.length)
+
+    expectStreamValues(listEntryAdded$, expected)
+      .then(next)
       .catch(next)
     action$
       .shamefullySendNext(actions.list.addEntry('list1', 'listitem1'))
@@ -181,6 +184,34 @@ describe('cycle-deepstream', () => {
       .shamefullySendNext(actions.list.addEntry('list1', 'listitem2'))
     action$
       .shamefullySendNext(actions.list.addEntry('list1', 'listitem3'))
+    action$
+      .shamefullySendNext(actions.list.addEntry('list1', 'listitem4'))
   })
 
+  it('must respond to removing things in a list', next => {
+    client.record.getList('list1').whenReady((list: deepstreamIO.List) => {
+      list.on('entry-removed', (entry: string, position: number) => {
+        console.log('ENTRY REMOVED', entry, position)
+      })
+      const listEntryRemoved$ = deep$
+        .filter(evt => evt.event === 'list.entry-removed')
+        .take(1)
+      expectStreamValues(listEntryRemoved$, [
+        { event: 'list.entry-removed', name: 'list1', entry: 'listitem1', position: 0 }
+      ]).then(next)
+        .catch(next)
+      action$.shamefullySendNext(actions.list.removeEntry('list1', 'listitem1'))
+    })
+  })
+
+  it('must get list entries', next => {
+    const listGetEntries$ = deep$
+      .filter(evt => evt.event === 'list.getEntries')
+      .take(1)
+    expectStreamValues(listGetEntries$, [
+      { event: 'list.getEntries', name: 'list1', data: ['listitem2', 'listitem3', 'listitem4'] }
+    ]).then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.list.getEntries('list1'))
+  })
 })

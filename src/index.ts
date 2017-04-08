@@ -407,7 +407,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       && (<ListEntryIntent>intent).entry !== undefined)
     const listAddEntryListener = listAddEntry$.addListener({
       next: (intent: ListEntryIntent) => {
-        logAction(intent.action, intent.name)
+        logAction(intent.action, intent.name, intent.entry)
         getList(intent.name).then(list => {
           list.addEntry(intent.entry, intent.index)
         })
@@ -421,7 +421,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       && (<ListEntryIntent>intent).entry !== undefined)
     const listRemoveEntryListener = listRemoveEntry$.addListener({
       next: (intent: ListEntryIntent) => {
-        logAction(intent.action, intent.name)
+        logAction(intent.action, intent.name, intent.entry)
         getList(intent.name).then(list => {
           list.removeEntry(intent.entry, intent.index)
         })

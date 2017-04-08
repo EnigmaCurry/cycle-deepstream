@@ -21,7 +21,9 @@ export const record = {
 
 export const list = {
   subscribe: (record: string, events = {}) => ({ action: 'list.subscribe', name: record, events: events }),
-  addEntry: (record: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: record, entry, index })
+  getEntries: (record: string) => ({ action: 'list.getEntries', name: record }),
+  addEntry: (record: string, entry: string, index?: number) => ({ action: 'list.addEntry', name: record, entry, index }),
+  removeEntry: (record: string, entry: string) => ({ action: 'list.removeEntry', name: record, entry })
 }
 
 export const rpc = {
