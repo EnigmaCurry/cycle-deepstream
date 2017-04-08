@@ -115,12 +115,21 @@ describe('cycle-deepstream', () => {
   it('must set records with record.set', next => {
     const recordSet$ = deep$
       .filter(evt => evt.event === 'record.set')
-      .take(1)
+      .take(2)
     expectStreamValues(recordSet$, [
+      // Four set actions are performed, only two have write acknowledgement:
+      { event: 'record.set', name: 'recordToModify' },
       { event: 'record.set', name: 'recordToModify' }
     ]).then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'bar' }, true))
+    //Set without write acknowledgement
+    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'somethingelse' }))
+    //Set with write acknowledgement
+    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'bar2' }, true))
+    //Set with path without write acknowledgement
+    action$.shamefullySendNext(actions.record.setPath('recordToModify', 'foo', 'somethingelse2'))
+    //Set with path and write acknowledgement
+    action$.shamefullySendNext(actions.record.setPath('recordToModify', 'foo', 'bar', true))
   })
 
   it('must retrieve records with record.get', next => {
