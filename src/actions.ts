@@ -14,7 +14,7 @@ export const record = {
   subscribe: (record: string, events = {}) => ({ action: 'record.subscribe', name: record, events: events }),
   snapshot: (record: string) => ({ action: 'record.snapshot', name: record }),
   get: (record: string) => ({ action: 'record.get', name: record }),
-  set: (record: string, data: Object) => ({ action: 'record.set', name: record, data }),
+  set: (record: string, data: Object, acknowledge?: boolean) => ({ action: 'record.set', name: record, data, acknowledge }),
   discard: (record: string) => ({ action: 'record.discard', name: record }),
   delete: (record: string) => ({ action: 'record.delete', name: record }),
 }

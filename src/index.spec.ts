@@ -112,6 +112,37 @@ describe('cycle-deepstream', () => {
     })
   })
 
+  it('must set records with record.set', next => {
+    const recordSet$ = deep$
+      .filter(evt => evt.event === 'record.set')
+      .take(1)
+    expectStreamValues(recordSet$, [
+      { event: 'record.set', name: 'recordToModify' }
+    ]).then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'bar' }, true))
+  })
+
+  it('must retrieve records with record.get', next => {
+    const recordGet$ = deep$
+      .filter(evt => evt.event === 'record.get')
+      .take(1)
+    expectStreamValues(recordGet$, [{ event: 'record.get', name: 'recordToModify', data: { foo: 'bar' } }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.get('recordToModify'))
+  })
+
+  it('must retrieve records with record.snapshot', next => {
+    const recordSnapshot$ = deep$
+      .filter(evt => evt.event === 'record.snapshot')
+      .take(1)
+    expectStreamValues(recordSnapshot$, [{ event: 'record.snapshot', name: 'recordToModify', data: { foo: 'bar' } }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.snapshot('recordToModify'))
+  })
+
   it('must respond to discarding records', next => {
     const recordDiscard$ = deep$
       .filter(evt => evt.event === 'record.discard')

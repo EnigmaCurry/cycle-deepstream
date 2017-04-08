@@ -28,6 +28,7 @@ export type RecordSetIntent = {
   name?: string,
   data: Object,
   path?: string,
+  acknowledge?: boolean
 }
 
 export type ListSetIntent = {
@@ -124,7 +125,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       return new Promise((resolve, reject) => {
         const list = cachedLists[name] === undefined ?
           client.record.getList(name) : cachedLists[name]
-        list.on('error', (err: string) => reject(err))
+        list.on('error', /* istanbul ignore next */(err: string) => reject(err))
         list.whenReady((list: deepstreamIO.List) => {
           cachedLists[name] = list
           resolve(list)
@@ -253,11 +254,26 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const recordSetListener = recordSet$.addListener({
       next: (intent: RecordSetIntent) => {
         logAction(intent.action, intent.name)
+        const writeCallback = (error: string) => {
+          if (error) {
+            console.error(error)
+          } else {
+            emit({ event: 'record.set', name: intent.name })
+          }
+        }
         getRecord(intent.name).then(record => {
           if (typeof intent.path === 'undefined') {
-            record.set(intent.data)
+            if (intent.acknowledge) {
+              record.set(intent.data, writeCallback)
+            } else {
+              record.set(intent.data)
+            }
           } else {
-            record.set(intent.path, intent.data)
+            if (intent.acknowledge) {
+              record.set(intent.path, intent.data, writeCallback)
+            } else {
+              record.set(intent.path, intent.data)
+            }
           }
         })
       },
