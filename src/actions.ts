@@ -18,6 +18,7 @@ export const record = {
   setPath: (record: string, path: string, data: Object, acknowledge?: boolean) => ({ action: 'record.set', name: record, path, data, acknowledge }),
   discard: (record: string) => ({ action: 'record.discard', name: record }),
   delete: (record: string) => ({ action: 'record.delete', name: record }),
+  listen: (pattern: string) => ({ action: 'record.listen', pattern })
 }
 
 export const list = {

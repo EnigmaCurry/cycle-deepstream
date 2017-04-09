@@ -315,10 +315,12 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       && (<ListenIntent>intent).pattern !== undefined)
     const recordListenListener = recordListen$.addListener({
       next: (intent: ListenIntent) => {
-        logAction(intent.action, intent.name)
+        logAction(intent.action, intent.pattern)
         client.record.listen(intent.pattern, (match, isSubscribed, response) => {
-          response.accept()
-          emit({ event: 'record.listen', match, isSubscribed })
+          if (isSubscribed) {
+            response.accept()
+            emit({ event: 'record.listen', match, isSubscribed })
+          }
         })
       },
       error: noop,

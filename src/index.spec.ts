@@ -172,6 +172,18 @@ describe('cycle-deepstream', () => {
     action$.shamefullySendNext(actions.record.delete('recordToDelete'))
   })
 
+  it('must respond to record listening', next => {
+    const recordListen$ = deep$
+      .filter(evt => evt.event === 'record.listen')
+      .take(1)
+    expectStreamValues(recordListen$, [{ event: 'record.listen', match: 'listen1', isSubscribed: true }])
+      .then(next)
+      .catch(next)
+    action$.shamefullySendNext(actions.record.listen('listen1'))
+    // Get the record with the other client, to trigger the listen callback:
+    client.record.getRecord('listen1')
+  })
+
   it('must logout from deepstream', next => {
     const logout$ = deep$
       .filter(evt => evt.event === 'logout')
