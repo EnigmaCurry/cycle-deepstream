@@ -6,7 +6,7 @@ import * as deepstream from '../actions/deepstream'
 import { Location } from 'history'
 import { Sources, Sinks } from '../types'
 import { Post } from '../containers'
-import { Intent as DSIntent } from '../../../../index'
+import { Intent as DSIntent } from '../../../../src/index'
 
 export function Home(sources: Sources): Sinks {
   const { DOM, history$, deep$, user$ } = sources

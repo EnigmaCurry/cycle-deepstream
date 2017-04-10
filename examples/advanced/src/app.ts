@@ -28,7 +28,7 @@ import * as makePathRegex from 'path-to-regexp'
 import '../styles/app.scss'
 
 // Import our deepstream driver from the parent project folder:
-import { makeDeepstreamDriver } from '../../../index'
+import { makeDeepstreamDriver } from '../../../src/index'
 
 // Import the main web component for our app via wc-loader:
 require('../x-app.html')
