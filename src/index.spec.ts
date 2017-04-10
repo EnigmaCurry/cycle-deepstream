@@ -1,10 +1,12 @@
 import xs, { Stream } from 'xstream'
 import delay from 'xstream/extra/delay'
+import fromEvent from 'xstream/extra/fromEvent'
 import * as deepstream from 'deepstream.io-client-js'
 import * as chai from 'chai'
 import { makeDeepstreamDriver } from './index'
 import { CycleDeepstream, Intent, Event } from './types'
 import * as actions from './actions'
+import { EventEmitter } from 'events'
 
 const expect = chai.expect
 const Deepstream = require('deepstream.io')
@@ -36,10 +38,15 @@ const expectStreamValues = (stream: Stream<any>, expected: Array<any>) => {
 
 describe('cycle-deepstream', () => {
   let server: any, url: string, client: deepstreamIO.Client
-  // action$ is requests to deepstream - shamefully sent next elements through the tests
+  // action$ is requests sent to deepstream emitted as events in each test
   // deep$ is events coming from deepstream
-  const action$ = xs.never()
+  const events = new EventEmitter()
+  const action$ = fromEvent(events, 'action')
   let deep$: Stream<Event>
+
+  const emitAction = (action: Object) => {
+    events.emit('action', action)
+  }
 
   before('start deepstream server', next => {
     portastic.find({ min: 6020, max: 6030 }).then((ports: Array<number>) => {
@@ -74,8 +81,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(login$, [{ event: 'login.success', data: null }])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.login())
+    emitAction(actions.login())
   })
 
   ////////////////////////////////////////
@@ -96,18 +102,12 @@ describe('cycle-deepstream', () => {
     ])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.record.subscribe('recordToModify'))
-    action$
-      .shamefullySendNext(actions.record.subscribe('recordToDiscard'))
-    action$
-      .shamefullySendNext(actions.record.subscribe('recordToDelete'))
-    action$
-      .shamefullySendNext(actions.record.subscribe('listitem1'))
-    action$
-      .shamefullySendNext(actions.record.subscribe('listitem2'))
-    action$
-      .shamefullySendNext(actions.record.subscribe('listitem3'))
+    emitAction(actions.record.subscribe('recordToModify'))
+    emitAction(actions.record.subscribe('recordToDiscard'))
+    emitAction(actions.record.subscribe('recordToDelete'))
+    emitAction(actions.record.subscribe('listitem1'))
+    emitAction(actions.record.subscribe('listitem2'))
+    emitAction(actions.record.subscribe('listitem3'))
   })
 
   it('must respond to changing records', next => {
@@ -139,13 +139,13 @@ describe('cycle-deepstream', () => {
     ]).then(next)
       .catch(next)
     //Set without write acknowledgement
-    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'somethingelse' }))
+    emitAction(actions.record.set('recordToModify', { foo: 'somethingelse' }))
     //Set with write acknowledgement
-    action$.shamefullySendNext(actions.record.set('recordToModify', { foo: 'bar2' }, true))
+    emitAction(actions.record.set('recordToModify', { foo: 'bar2' }, true))
     //Set with path without write acknowledgement
-    action$.shamefullySendNext(actions.record.setPath('recordToModify', 'foo', 'somethingelse2'))
+    emitAction(actions.record.setPath('recordToModify', 'foo', 'somethingelse2'))
     //Set with path and write acknowledgement
-    action$.shamefullySendNext(actions.record.setPath('recordToModify', 'foo', 'bar', true))
+    emitAction(actions.record.setPath('recordToModify', 'foo', 'bar', true))
   })
 
   it('must retrieve records with record.get', next => {
@@ -155,7 +155,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(recordGet$, [{ event: 'record.get', name: 'recordToModify', data: { foo: 'bar' } }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.get('recordToModify'))
+    emitAction(actions.record.get('recordToModify'))
   })
 
   it('must return the same scope in the response if given in the action', next => {
@@ -175,8 +175,8 @@ describe('cycle-deepstream', () => {
       }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(explicitScope(actions.record.get('recordToModify')))
-    action$.shamefullySendNext(implicitScope(actions.record.get('recordToModify')))
+    emitAction(explicitScope(actions.record.get('recordToModify')))
+    emitAction(implicitScope(actions.record.get('recordToModify')))
   })
 
   it('must retrieve records with record.snapshot', next => {
@@ -186,7 +186,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(recordSnapshot$, [{ event: 'record.snapshot', name: 'recordToModify', data: { foo: 'bar' } }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.snapshot('recordToModify'))
+    emitAction(actions.record.snapshot('recordToModify'))
   })
 
   it('must respond to discarding records', next => {
@@ -196,7 +196,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(recordDiscard$, [{ event: 'record.discard', name: 'recordToDiscard' }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.discard('recordToDiscard'))
+    emitAction(actions.record.discard('recordToDiscard'))
   })
 
   it('must respond to deleting records', next => {
@@ -206,7 +206,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(recordDelete$, [{ event: 'record.delete', name: 'recordToDelete' }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.delete('recordToDelete'))
+    emitAction(actions.record.delete('recordToDelete'))
   })
 
   it('must respond to record listening', next => {
@@ -216,7 +216,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(recordListen$, [{ event: 'record.listen', match: 'listen1', isSubscribed: true }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.record.listen('listen1'))
+    emitAction(actions.record.listen('listen1'))
     // Get the record with the other client, to trigger the listen callback:
     client.record.getRecord('listen1')
   })
@@ -231,8 +231,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(logout$, [{ event: 'logout' }])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.logout())
+    emitAction(actions.logout())
   })
 
   it('must support login again after logout', next => {
@@ -242,8 +241,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(login$, [{ event: 'login.success', data: null }])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.login())
+    emitAction(actions.login())
   })
 
   ////////////////////////////////////////
@@ -257,8 +255,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(subscribe$, [{ event: 'list.change', name: 'list1', data: [] }])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.list.subscribe('list1'))
+    emitAction(actions.list.subscribe('list1'))
   })
 
   it('must respond to adding things to a list', next => {
@@ -274,14 +271,10 @@ describe('cycle-deepstream', () => {
     expectStreamValues(listEntryAdded$, expected)
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.list.addEntry('list1', 'listitem1'))
-    action$
-      .shamefullySendNext(actions.list.addEntry('list1', 'listitem2'))
-    action$
-      .shamefullySendNext(actions.list.addEntry('list1', 'listitem3'))
-    action$
-      .shamefullySendNext(actions.list.addEntry('list1', 'listitem4'))
+    emitAction(actions.list.addEntry('list1', 'listitem1'))
+    emitAction(actions.list.addEntry('list1', 'listitem2'))
+    emitAction(actions.list.addEntry('list1', 'listitem3'))
+    emitAction(actions.list.addEntry('list1', 'listitem4'))
   })
 
   it('must respond to removing things in a list', next => {
@@ -292,7 +285,7 @@ describe('cycle-deepstream', () => {
       { event: 'list.entry-removed', name: 'list1', entry: 'listitem1', position: 0 }
     ]).then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.list.removeEntry('list1', 'listitem1'))
+    emitAction(actions.list.removeEntry('list1', 'listitem1'))
   })
 
   it('must get list entries', next => {
@@ -303,7 +296,7 @@ describe('cycle-deepstream', () => {
       { event: 'list.getEntries', name: 'list1', data: ['listitem2', 'listitem3', 'listitem4'] }
     ]).then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.list.getEntries('list1'))
+    emitAction(actions.list.getEntries('list1'))
   })
 
   it('must set list entries', next => {
@@ -314,7 +307,7 @@ describe('cycle-deepstream', () => {
       { event: 'list.change', name: 'list1', data: ['listitem1', 'listitem2'] }
     ]).then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.list.setEntries('list1', ['listitem1', 'listitem2']))
+    emitAction(actions.list.setEntries('list1', ['listitem1', 'listitem2']))
   })
 
   it('must get existing list entries on new subscribe', next => {
@@ -327,8 +320,7 @@ describe('cycle-deepstream', () => {
     ])
       .then(next)
       .catch(next)
-    action$
-      .shamefullySendNext(actions.list.subscribe('list1'))
+    emitAction(actions.list.subscribe('list1'))
   })
 
   it('must respond to discarding lists', next => {
@@ -338,7 +330,7 @@ describe('cycle-deepstream', () => {
     expectStreamValues(listDiscard$, [{ event: 'list.discard', name: 'list1' }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(actions.list.discard('list1'))
+    emitAction(actions.list.discard('list1'))
   })
 
   it('must respond to deleting a list', next => {
@@ -355,10 +347,8 @@ describe('cycle-deepstream', () => {
     expectStreamValues(delete$, [{ event: 'list.delete', name: 'list1' }])
       .then(next).catch(next)
 
-    action$
-      .shamefullySendNext(actions.list.subscribe('list1'))
-    action$
-      .shamefullySendNext(actions.list.delete('list1'))
+    emitAction(actions.list.subscribe('list1'))
+    emitAction(actions.list.delete('list1'))
   })
 
   ////////////////////////////////////////
@@ -373,7 +363,6 @@ describe('cycle-deepstream', () => {
       { event: 'rpc.response', data: 'abg-fb-frperg', scope: 'rpc test' }
     ]).then(next).catch(next)
 
-    action$
-      .shamefullySendNext(scope(actions.rpc.make('rot13', 'not-so-secret')))
+    emitAction(scope(actions.rpc.make('rot13', 'not-so-secret')))
   })
 })
