@@ -32,7 +32,7 @@ export const list = {
 }
 
 export const rpc = {
-  make: (method: string, data: Object) => ({ action: 'rpc.make', method: method, data })
+  make: (method: string, data: Object, scope?: string) => ({ action: 'rpc.make', method: method, data, scope })
 }
 
 export const scope = (scope: string) => {

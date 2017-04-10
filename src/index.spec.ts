@@ -61,7 +61,6 @@ describe('cycle-deepstream', () => {
           }))
         })
 
-
         next()
       })
       server.start()
@@ -342,14 +341,12 @@ describe('cycle-deepstream', () => {
     expectStreamValues(subscribe$, [
       { event: 'list.entry-existing', name: 'list1', entry: 'listitem1', position: 0 },
       { event: 'list.entry-existing', name: 'list1', entry: 'listitem2', position: 1 }
-    ])
-      .catch(next)
+    ]).catch(next)
     const delete$ = deep$
       .filter(evt => evt.event === 'list.delete')
       .take(1)
     expectStreamValues(delete$, [{ event: 'list.delete', name: 'list1' }])
-      .then(next)
-      .catch(next)
+      .then(next).catch(next)
 
     action$
       .shamefullySendNext(actions.list.subscribe('list1'))
@@ -360,8 +357,16 @@ describe('cycle-deepstream', () => {
   ////////////////////////////////////////
   // RPC
   ////////////////////////////////////////
-  it.skip('must respond to making rpc calls', next => {
+  it('must respond to making rpc calls', next => {
+    const scope = actions.scope('rpc test')
     const rpc$ = deep$
-      .filter(evt => evt.event === '')
+      .filter(evt => evt.event === 'rpc.response' && evt.scope === 'rpc test')
+      .take(1)
+    expectStreamValues(rpc$, [
+      { event: 'rpc.response', data: 'abg-fb-frperg', scope: 'rpc test' }
+    ]).then(next).catch(next)
+
+    action$
+      .shamefullySendNext(scope(actions.rpc.make('rot13', 'not-so-secret')))
   })
 })

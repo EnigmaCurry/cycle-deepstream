@@ -431,7 +431,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           if (error) {
             throw new Error(error)
           }
-          // TODO how to link the rpc response to the original request? new ID?
+          emit({ event: 'rpc.response', data: result }, intent.scope)
         })
       },
       error: noop,
