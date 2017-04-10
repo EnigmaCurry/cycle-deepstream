@@ -32,6 +32,10 @@ export const list = {
   delete: (list: string, scope?: string) => ({ action: 'list.delete', name: list })
 }
 
+export const rpc = {
+  make: (method: string, data: Object, scope?: string) => ({ action: 'rpc.make', method: method, data, scope })
+}
+
 export const event = {
   subscribe: (event: string, scope?: string) => ({ action: 'event.subscribe', name: event, scope }),
   unsubscribe: (event: string, scope?: string) => ({ action: 'event.unsubscribe', name: event, scope }),
@@ -40,8 +44,10 @@ export const event = {
   unlisten: (pattern: string, scope?: string) => ({ action: 'event.unlisten', pattern, scope })
 }
 
-export const rpc = {
-  make: (method: string, data: Object, scope?: string) => ({ action: 'rpc.make', method: method, data, scope })
+export const presence = {
+  subscribe: (scope?: string) => ({ action: 'presence.subscribe', scope }),
+  unsubscribe: (scope?: string) => ({ action: 'presence.unsubscribe', scope }),
+  getAll: (scope?: string) => ({ action: 'presence.getAll', scope })
 }
 
 export const scope = (scope?: string): types.ScopeFunction => {

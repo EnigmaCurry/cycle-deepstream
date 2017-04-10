@@ -57,7 +57,10 @@ export type Event = {
   error?: string,
   state?: string,
   match?: string,
-  isSubscribed?: boolean
+  isSubscribed?: boolean,
+  clients?: Array<string>,
+  username?: string,
+  isLoggedIn?: boolean
 }
 
 export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>

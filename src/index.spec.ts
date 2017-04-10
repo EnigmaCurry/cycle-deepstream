@@ -404,4 +404,47 @@ describe('cycle-deepstream', () => {
     }).catch(next)
     emitAction(actions.event.listen('test-event2'))
   })
+
+  ////////////////////////////////////////
+  // Presence
+  ////////////////////////////////////////
+  it('must allow subscribing and unsubscribing to presence events', next => {
+    const scope = 'test-presence'
+    const presence$ = deep$
+      .filter(evt => evt.event === 'presence.event')
+      .take(2)
+    expectStreamValues(presence$, [
+      { event: 'presence.event', username: 'bob', isLoggedIn: true, scope },
+      { event: 'presence.event', username: 'bob', isLoggedIn: false, scope }
+    ]).then(() => {
+      emitAction(actions.presence.unsubscribe(scope))
+      next()
+    }).catch(next)
+
+    emitAction(actions.presence.subscribe(scope))
+    //Login as bob:
+    const tempClient = deepstream(url)
+    tempClient.on('connectionStateChanged', (state: string) => {
+      if (state === 'OPEN') {
+        tempClient.close()
+      }
+    })
+    tempClient.login({ username: 'bob' })
+  })
+
+  it('must allow getting all connected clients with presence.getAll', next => {
+    const presence$ = deep$
+      .filter(evt => evt.event === 'presence.getAll')
+      .take(1)
+    expectStreamValues(presence$, [
+      { event: 'presence.getAll', clients: ['jean-luc'] }
+    ]).then(next).catch(next)
+    const tempClient = deepstream(url)
+    tempClient.on('connectionStateChanged', (state: string) => {
+      if (state === 'OPEN') {
+        emitAction(actions.presence.getAll())
+      }
+    })
+    tempClient.login({ username: 'jean-luc' })
+  })
 })

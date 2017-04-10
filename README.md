@@ -100,9 +100,9 @@ Deepstream API Implementation:
     - [x] event.unlisten
     
   - Presence:
-    - [ ] presence.subscribe
-    - [ ] presence.unsubscribe
-    - [ ] presence.getAll
+    - [x] presence.subscribe
+    - [x] presence.unsubscribe
+    - [x] presence.getAll
     
   - RPC:
     - [x] rpc.make

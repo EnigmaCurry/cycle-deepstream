@@ -20,6 +20,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
   let cachedRecords: any = {}
   let cachedLists: any = {}
   let eventCallbacks: any = {}
+  let presenceCallbacks: any = {}
   const log = console.debug === undefined ? console.log : console.debug
 
   return function deepstreamDriver(action$) {
@@ -97,6 +98,15 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       return eventCallbacks[name]
     }
 
+    function getPresenceCallback(scope: string): (username: string, isLoggedIn: boolean) => void {
+      if (eventCallbacks[scope] === undefined) {
+        eventCallbacks[scope] = (username: string, isLoggedIn: boolean) => {
+          emit({ event: 'presence.event', username, isLoggedIn }, scope)
+        }
+      }
+      return eventCallbacks[scope]
+    }
+
     /* istanbul ignore next */
     const noop = () => { }
 
@@ -111,6 +121,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         cachedRecords = {}
         cachedLists = {}
         eventCallbacks = {}
+        presenceCallbacks = {}
         client = deepstream(url, options).login(
           intent.auth, (success: boolean, data: Object) => {
             if (success) {
@@ -512,6 +523,36 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       error: noop,
       complete: noop
     })
+
+    const presenceSubscribe$ = action$.filter(intent => intent.action === 'presence.subscribe')
+    const presenceSubscribeListener = presenceSubscribe$.addListener({
+      next: intent => {
+        logAction(intent.action)
+        const callback = getPresenceCallback(intent.scope)
+        client.presence.subscribe(callback)
+      }
+    })
+
+
+    const presenceUnsubscribe$ = action$.filter(intent => intent.action === 'presence.unsubscribe')
+    const presenceUnsubscribeListener = presenceUnsubscribe$.addListener({
+      next: intent => {
+        logAction(intent.action)
+        const callback = getPresenceCallback(intent.scope)
+        client.presence.unsubscribe(callback)
+      }
+    })
+
+    const presenceGetAll$ = action$.filter(intent => intent.action === 'presence.getAll')
+    const presenceGetAllListener = presenceGetAll$.addListener({
+      next: intent => {
+        logAction(intent.action)
+        client.presence.getAll(clients => {
+          emit({ event: 'presence.getAll', clients }, intent.scope)
+        })
+      }
+    })
+
 
     return response$
   }
