@@ -1,6 +1,7 @@
 // Plain object action descriptors - 
-// There are just helper functions to help you build the objects that
+// These are just helper functions to help you build the objects that
 // the cycle driver interacts with.
+import * as types from './types'
 
 export function login(auth?: Object) {
   return { action: 'login', auth }
@@ -35,8 +36,13 @@ export const rpc = {
   make: (method: string, data: Object, scope?: string) => ({ action: 'rpc.make', method: method, data, scope })
 }
 
-export const scope = (scope: string) => {
-  return (data: Object) => {
+export const scope = (scope?: string): types.ScopeFunction => {
+  if (typeof scope === 'undefined') {
+    scope = (new Date()).getTime().toString(36) + (Math.random() * 1E18).toString(36)
+  }
+  const func: types.ScopeFunction = (data: Object) => {
     return { ...data, scope }
   }
+  func.scope = scope
+  return func
 }

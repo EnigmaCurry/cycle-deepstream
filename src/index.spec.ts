@@ -159,17 +159,24 @@ describe('cycle-deepstream', () => {
   })
 
   it('must return the same scope in the response if given in the action', next => {
-    const scope = actions.scope('Unique scope for this test')
+    const explicitScope = actions.scope('Explicit scope for this test')
+    const implicitScope = actions.scope()
     const recordGet$ = deep$
       .filter(evt => evt.event === 'record.get')
-      .take(1)
-    expectStreamValues(recordGet$, [{
-      event: 'record.get', name: 'recordToModify',
-      data: { foo: 'bar' }, scope: 'Unique scope for this test'
-    }])
+      .take(2)
+    expectStreamValues(recordGet$, [
+      {
+        event: 'record.get', name: 'recordToModify',
+        data: { foo: 'bar' }, scope: explicitScope.scope
+      },
+      {
+        event: 'record.get', name: 'recordToModify',
+        data: { foo: 'bar' }, scope: implicitScope.scope
+      }])
       .then(next)
       .catch(next)
-    action$.shamefullySendNext(scope(actions.record.get('recordToModify')))
+    action$.shamefullySendNext(explicitScope(actions.record.get('recordToModify')))
+    action$.shamefullySendNext(implicitScope(actions.record.get('recordToModify')))
   })
 
   it('must retrieve records with record.snapshot', next => {

@@ -53,3 +53,7 @@ export type Event = {
 }
 
 export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>
+
+export interface ScopeFunction extends Function {
+  scope?: string
+}
