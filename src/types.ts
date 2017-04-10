@@ -42,6 +42,7 @@ export interface RPCIntent extends Intent {
 export type Event = {
   event: string,
   name?: string,
+  scope?: string,
   data?: any,
   entry?: string,
   position?: number,
