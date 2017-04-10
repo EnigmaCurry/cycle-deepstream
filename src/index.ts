@@ -4,71 +4,13 @@ import fromEvent from 'xstream/extra/fromEvent'
 import concat from 'xstream/extra/concat'
 import * as deepstream from 'deepstream.io-client-js'
 import { EventEmitter } from 'events'
+import {
+  Intent, LoginIntent, SubscribeIntent,
+  RecordSetIntent, ListSetIntent, ListenIntent,
+  ListEntryIntent, RPCIntent, CycleDeepstream, Event
+} from './types'
+
 const stringify = require('json-stringify-safe')
-
-export type Intent = {
-  action: string,
-  name?: string
-}
-
-export type LoginIntent = {
-  action: string,
-  name?: string,
-  auth: Object
-}
-
-export type SubscribeIntent = {
-  action: string,
-  name?: string,
-  events: Object
-}
-
-export type RecordSetIntent = {
-  action: string,
-  name?: string,
-  data: Object,
-  path?: string,
-  acknowledge?: boolean
-}
-
-export type ListSetIntent = {
-  action: string,
-  name?: string,
-  entries: Array<string>
-}
-
-export type ListEntryIntent = {
-  action: string,
-  name?: string,
-  entry: string,
-  index: number
-}
-
-export type ListenIntent = {
-  action: string,
-  name?: string,
-  pattern: string
-}
-
-export type RPCIntent = {
-  action: string,
-  method: string,
-  data: Object
-}
-
-export type Event = {
-  event: string,
-  name?: string,
-  data?: any,
-  entry?: string,
-  position?: number,
-  error?: string,
-  state?: string,
-  match?: string,
-  isSubscribed?: boolean
-}
-
-export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>
 
 export function makeDeepstreamDriver({url, options = {}, debug = false}:
   { url: string, options?: Object, debug?: boolean }): CycleDeepstream {
@@ -80,10 +22,10 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
 
   return function deepstreamDriver(action$) {
     // Internal event emitter to delegate between action and response 
-    const deepstreamEvents = new EventEmitter()
+    const driverEvents = new EventEmitter()
 
     // The stream of events we will return from this driver:
-    const response$: Stream<Event> = fromEvent(deepstreamEvents, 'deepstream-event')
+    const response$: Stream<Event> = fromEvent(driverEvents, 'deepstream-event')
     // Log the events that the output stream sees
     // This also ensures that the stream is created now, and ensures
     // emitted events have a valid listener.
@@ -91,8 +33,12 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: i => logEvent(i)
     })
 
-    const emit = (data: Event) => {
-      deepstreamEvents.emit('deepstream-event', data)
+    const emit = (data: Event, scope: string) => {
+      if (typeof scope === 'undefined') {
+        driverEvents.emit('deepstream-event', data)
+      } else {
+        driverEvents.emit('deepstream-event', { ...data, scope })
+      }
     }
 
     function logAction(...msgs: Array<string>) {
@@ -149,16 +95,16 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         client = deepstream(url, options).login(
           intent.auth, (success: boolean, data: Object) => {
             if (success) {
-              emit({ event: 'login.success', data })
+              emit({ event: 'login.success', data }, intent.scope)
             } else {
-              emit({ event: 'login.failure', data })
+              emit({ event: 'login.failure', data }, intent.scope)
             }
           })
         client.on('error', (error: string) => {
-          emit({ event: 'client.error', error })
+          emit({ event: 'client.error', error }, intent.scope)
         })
         client.on('connectionStateChanged', (state: string) => {
-          emit({ event: 'connection.state', state })
+          emit({ event: 'connection.state', state }, intent.scope)
         })
       },
       error: noop,
@@ -175,7 +121,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         if (client !== undefined) {
           client.close()
         }
-        emit({ event: 'logout' })
+        emit({ event: 'logout' }, intent.scope)
       },
       error: noop,
       complete: noop
@@ -197,22 +143,22 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         getRecord(intent.name).then(record => {
           if (events['record.change']) {
             record.subscribe((data: Object) => {
-              emit({ event: 'record.change', name: record.name, data: data })
+              emit({ event: 'record.change', name: record.name, data: data }, intent.scope)
             }, events['record.existing'])
           }
           if (events['record.discard']) {
             record.on('discard', () => {
-              emit({ event: 'record.discard', name: record.name })
+              emit({ event: 'record.discard', name: record.name }, intent.scope)
             })
           }
           if (events['record.delete']) {
             record.on('delete', () => {
-              emit({ event: 'record.delete', name: record.name })
+              emit({ event: 'record.delete', name: record.name }, intent.scope)
             })
           }
           if (events['record.error']) {
             record.on('error', (err: string) => {
-              emit({ event: 'record.error', name: record.name, error: err })
+              emit({ event: 'record.error', name: record.name, error: err }, intent.scope)
             })
           }
         })
@@ -227,7 +173,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         getRecord(intent.name).then(record => {
-          emit({ event: 'record.get', name: record.name, data: record.get() })
+          emit({ event: 'record.get', name: record.name, data: record.get() }, intent.scope)
         })
       },
       error: noop,
@@ -240,7 +186,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         client.record.snapshot(intent.name, (error, data) => {
-          emit({ event: 'record.snapshot', name: intent.name, data })
+          emit({ event: 'record.snapshot', name: intent.name, data }, intent.scope)
         })
       },
       error: noop,
@@ -258,7 +204,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           if (error) {
             console.error(error)
           } else {
-            emit({ event: 'record.set', name: intent.name })
+            emit({ event: 'record.set', name: intent.name }, intent.scope)
           }
         }
         getRecord(intent.name).then(record => {
@@ -319,7 +265,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         client.record.listen(intent.pattern, (match, isSubscribed, response) => {
           if (isSubscribed) {
             response.accept()
-            emit({ event: 'record.listen', match, isSubscribed })
+            emit({ event: 'record.listen', match, isSubscribed }, intent.scope)
           }
         })
       },
@@ -347,44 +293,44 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           let callbackFirstCall = true
           list.subscribe((data: Array<string>) => {
             if (events['list.change']) {
-              emit({ event: 'list.change', name: list.name, data: data })
+              emit({ event: 'list.change', name: list.name, data: data }, intent.scope)
             }
             // Only do this the *first* time the callback is called, on subscription:
             if (events['list.entry-existing'] && callbackFirstCall) {
               for (let i = 0; i < data.length; i++) {
-                emit({ event: 'list.entry-existing', name: list.name, entry: data[i], position: i })
+                emit({ event: 'list.entry-existing', name: list.name, entry: data[i], position: i }, intent.scope)
               }
             }
             callbackFirstCall = false
           }, true)
           if (events['list.discard']) {
             list.on('discard', () => {
-              emit({ event: 'list.discard', name: list.name })
+              emit({ event: 'list.discard', name: list.name }, intent.scope)
             })
           }
           if (events['list.delete']) {
             list.on('delete', () => {
-              emit({ event: 'list.delete', name: list.name })
+              emit({ event: 'list.delete', name: list.name }, intent.scope)
             })
           }
           if (events['list.error']) {
             list.on('error', (err: string) => {
-              emit({ event: 'list.error', name: list.name, error: err })
+              emit({ event: 'list.error', name: list.name, error: err }, intent.scope)
             })
           }
           if (events['list.entry-added']) {
             list.on('entry-added', (entry: string, position: number) => {
-              emit({ event: 'list.entry-added', name: list.name, entry, position })
+              emit({ event: 'list.entry-added', name: list.name, entry, position }, intent.scope)
             })
           }
           if (events['list.entry-moved']) {
             list.on('entry-moved', (entry: string, position: number) => {
-              emit({ event: 'list.entry-moved', name: list.name, entry, position })
+              emit({ event: 'list.entry-moved', name: list.name, entry, position }, intent.scope)
             })
           }
           if (events['list.entry-removed']) {
             list.on('entry-removed', (entry: string, position: number) => {
-              emit({ event: 'list.entry-removed', name: list.name, entry, position })
+              emit({ event: 'list.entry-removed', name: list.name, entry, position }, intent.scope)
             })
           }
         })
@@ -399,7 +345,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       next: intent => {
         logAction(intent.action, intent.name)
         getList(intent.name).then(list => {
-          emit({ event: 'list.getEntries', name: list.name, data: list.getEntries() })
+          emit({ event: 'list.getEntries', name: list.name, data: list.getEntries() }, intent.scope)
         })
       },
       error: noop,

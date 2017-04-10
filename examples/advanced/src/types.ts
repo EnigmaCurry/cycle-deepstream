@@ -1,7 +1,7 @@
 import { Stream } from 'xstream'
 import { DOMSource, VNode } from '@cycle/dom/lib'
 import { HistoryInput } from '@cycle/history/lib'
-import { Intent, Event } from '../../../src/index'
+import { Intent, Event } from '../../../src/types'
 
 export type UserData = {
   userid: string,

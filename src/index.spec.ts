@@ -2,7 +2,8 @@ import xs, { Stream } from 'xstream'
 import delay from 'xstream/extra/delay'
 import * as deepstream from 'deepstream.io-client-js'
 import * as chai from 'chai'
-import { makeDeepstreamDriver, CycleDeepstream, Intent, Event } from './index'
+import { makeDeepstreamDriver } from './index'
+import { CycleDeepstream, Intent, Event } from './types'
 import * as actions from './actions'
 
 const expect = chai.expect
@@ -40,7 +41,7 @@ describe('cycle-deepstream', () => {
   const action$ = xs.never()
   let deep$: Stream<Event>
 
-  before('start deepstream server', (next) => {
+  before('start deepstream server', next => {
     portastic.find({ min: 6020, max: 6030 }).then((ports: Array<number>) => {
       url = `localhost:${ports[0]}`
       server = new Deepstream({ port: ports[0] })
@@ -48,7 +49,19 @@ describe('cycle-deepstream', () => {
         expect(server.isRunning()).to.be.true
         deep$ = makeDeepstreamDriver(
           { url, options: { maxReconnectAttempts: 0 }, debug: true })(action$)
+
+        //Secondary client we use to interact directly with deepstream
         client = deepstream(url).login()
+        //Provide an rpc for tests to call:
+        client.rpc.provide('rot13', (data: any, response: deepstreamIO.RPCResponse) => {
+          response.send(data.replace(/[A-Za-z]/g, (c: string) => {
+            return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".charAt(
+              "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm".indexOf(c)
+            )
+          }))
+        })
+
+
         next()
       })
       server.start()
@@ -65,6 +78,10 @@ describe('cycle-deepstream', () => {
     action$
       .shamefullySendNext(actions.login())
   })
+
+  ////////////////////////////////////////
+  // Records
+  ////////////////////////////////////////
 
   it('must subscribe to records', next => {
     const subscribe$ = deep$
@@ -183,6 +200,9 @@ describe('cycle-deepstream', () => {
     // Get the record with the other client, to trigger the listen callback:
     client.record.getRecord('listen1')
   })
+  ////////////////////////////////////////
+  // Logout / Re-Login
+  ////////////////////////////////////////
 
   it('must logout from deepstream', next => {
     const logout$ = deep$
@@ -205,6 +225,10 @@ describe('cycle-deepstream', () => {
     action$
       .shamefullySendNext(actions.login())
   })
+
+  ////////////////////////////////////////
+  // Lists
+  ////////////////////////////////////////
 
   it('must subscribe to lists', next => {
     const subscribe$ = deep$
@@ -319,5 +343,11 @@ describe('cycle-deepstream', () => {
       .shamefullySendNext(actions.list.delete('list1'))
   })
 
-
+  ////////////////////////////////////////
+  // RPC
+  ////////////////////////////////////////
+  it.skip('must respond to making rpc calls', next => {
+    const rpc$ = deep$
+      .filter(evt => evt.event === '')
+  })
 })
