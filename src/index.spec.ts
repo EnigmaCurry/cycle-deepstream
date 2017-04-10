@@ -365,4 +365,43 @@ describe('cycle-deepstream', () => {
 
     emitAction(scope(actions.rpc.make('rot13', 'not-so-secret')))
   })
+
+  ////////////////////////////////////////
+  // Events
+  ////////////////////////////////////////
+  it('must subscribe and unsubscribe to events', next => {
+    const subscribe$ = deep$
+      .filter(evt => evt.event === 'event.emit')
+      .take(1)
+    const event = { event: 'event.emit', name: 'test-event', data: { foo: 'bar' } }
+    expectStreamValues(subscribe$, [event]).then(() => {
+      emitAction(actions.event.unsubscribe('test-event'))
+      next()
+    }).catch(next)
+
+    emitAction(actions.event.subscribe('test-event'))
+    //Fire the event with our other client:
+    client.event.emit('test-event', event)
+  })
+
+  it('must emit events', next => {
+    client.event.subscribe('test-event2', data => {
+      expect(data).to.deep.equal({ foo: 'bar' })
+      next()
+    })
+    emitAction(actions.event.emit('test-event2', { foo: 'bar' }))
+  })
+
+  it('must listen and unlisten to event subscriptions', next => {
+    const listen$ = deep$
+      .filter(evt => evt.event === 'event.listen')
+      .take(1)
+    expectStreamValues(listen$, [
+      { event: 'event.listen', match: 'test-event2' }
+    ]).then(() => {
+      emitAction(actions.event.unlisten('test-event2'))
+      next()
+    }).catch(next)
+    emitAction(actions.event.listen('test-event2'))
+  })
 })

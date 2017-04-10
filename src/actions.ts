@@ -32,6 +32,14 @@ export const list = {
   delete: (list: string, scope?: string) => ({ action: 'list.delete', name: list })
 }
 
+export const event = {
+  subscribe: (event: string, scope?: string) => ({ action: 'event.subscribe', name: event, scope }),
+  unsubscribe: (event: string, scope?: string) => ({ action: 'event.unsubscribe', name: event, scope }),
+  emit: (name: string, data: any, scope?: string) => ({ action: 'event.emit', name, data, scope }),
+  listen: (pattern: string, scope?: string) => ({ action: 'event.listen', pattern, scope }),
+  unlisten: (pattern: string, scope?: string) => ({ action: 'event.unlisten', pattern, scope })
+}
+
 export const rpc = {
   make: (method: string, data: Object, scope?: string) => ({ action: 'rpc.make', method: method, data, scope })
 }

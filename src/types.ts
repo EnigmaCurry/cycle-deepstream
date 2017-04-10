@@ -34,6 +34,14 @@ export interface ListenIntent extends Intent {
   pattern: string
 }
 
+export interface EventEmitIntent extends Intent {
+  data: any
+}
+
+export interface EventListenIntent extends Intent {
+  pattern: string
+}
+
 export interface RPCIntent extends Intent {
   method: string,
   data: Object

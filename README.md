@@ -60,9 +60,8 @@ Deepstream API Implementation:
     - [x] record.discard
     - [x] record.delete
     - [x] record.listen
-    - [ ] record.unsubscribe 
-      - Not implemented. There is only ever one subscription per
-        record, so use record.discard instead.
+    - [ ] record.unsubscribe
+      - Not implemented. Use record.discard instead.
     
   - Lists:
     - [x] list.subscribe
@@ -90,15 +89,15 @@ Deepstream API Implementation:
     - [x] list.discard
     - [x] list.delete
     - [ ] list.unsubscribe
-      - Not implemented. There is only ever one subscription per
-        list, so use list.discard instead.
+      - Not implemented. Use list.discard instead.
     
     
   - Events:
-    - [ ] event.subscribe
-    - [ ] event.unsubscribe
-    - [ ] event.emit
-    - [ ] event.listen
+    - [x] event.subscribe
+    - [x] event.unsubscribe
+    - [x] event.emit
+    - [x] event.listen
+    - [x] event.unlisten
     
   - Presence:
     - [ ] presence.subscribe
@@ -106,7 +105,7 @@ Deepstream API Implementation:
     - [ ] presence.getAll
     
   - RPC:
-    - [ ] rpc.make
+    - [x] rpc.make
     - [ ] rpc.provide - I think this makes no sense to implement in cycle?
 
 TODO

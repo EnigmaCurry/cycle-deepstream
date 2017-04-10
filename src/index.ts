@@ -7,7 +7,8 @@ import { EventEmitter } from 'events'
 import {
   Intent, LoginIntent, SubscribeIntent,
   RecordSetIntent, ListSetIntent, ListenIntent,
-  ListEntryIntent, RPCIntent, CycleDeepstream, Event
+  ListEntryIntent, EventEmitIntent, EventListenIntent,
+  RPCIntent, CycleDeepstream, Event
 } from './types'
 
 const stringify = require('json-stringify-safe')
@@ -18,6 +19,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
   let client: deepstreamIO.Client
   let cachedRecords: any = {}
   let cachedLists: any = {}
+  let eventCallbacks: any = {}
   const log = console.debug === undefined ? console.log : console.debug
 
   return function deepstreamDriver(action$) {
@@ -55,7 +57,10 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       }
     }
 
-    function getRecord(name: string): Promise<deepstreamIO.Record> {
+    function getRecord(name: string, scope?: string): Promise<deepstreamIO.Record> {
+      if (typeof scope !== 'undefined') {
+        name = name + scope
+      }
       return new Promise((resolve, reject) => {
         const record = cachedRecords[name] === undefined ?
           client.record.getRecord(name) : cachedRecords[name]
@@ -67,7 +72,10 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
       })
     }
 
-    function getList(name: string): Promise<deepstreamIO.List> {
+    function getList(name: string, scope?: string): Promise<deepstreamIO.List> {
+      if (typeof scope !== 'undefined') {
+        name = name + scope
+      }
       return new Promise((resolve, reject) => {
         const list = cachedLists[name] === undefined ?
           client.record.getList(name) : cachedLists[name]
@@ -77,6 +85,16 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           resolve(list)
         })
       })
+    }
+
+    function getEventCallback(name: string, scope?: string): (data: any) => string {
+      if (typeof scope !== 'undefined') {
+        name = name + scope
+      }
+      if (eventCallbacks[name] === undefined) {
+        eventCallbacks[name] = (data: any) => emit(data, scope)
+      }
+      return eventCallbacks[name]
     }
 
     /* istanbul ignore next */
@@ -92,6 +110,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         // Delete caches:
         cachedRecords = {}
         cachedLists = {}
+        eventCallbacks = {}
         client = deepstream(url, options).login(
           intent.auth, (success: boolean, data: Object) => {
             if (success) {
@@ -417,6 +436,62 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
           list.discard()
           delete cachedLists[list.name]
         })
+      },
+      error: noop,
+      complete: noop
+    })
+
+    const eventSubscribe$ = action$.filter(intent => intent.action === 'event.subscribe'
+      && intent.name !== undefined)
+    const eventSubscribeListener = eventSubscribe$.addListener({
+      next: intent => {
+        logAction(intent.action, intent.name)
+        const callback = getEventCallback(intent.name, intent.scope)
+        client.event.subscribe(intent.name, callback)
+      }
+    })
+
+    const eventUnsubscribe$ = action$.filter(intent => intent.action === 'event.unsubscribe'
+      && intent.name !== undefined)
+    const eventUnsubscribeListener = eventUnsubscribe$.addListener({
+      next: intent => {
+        logAction(intent.action, intent.name)
+        const callback = getEventCallback(intent.name, intent.scope)
+        client.event.unsubscribe(intent.name, callback)
+      }
+    })
+
+    const eventEmit$ = action$.filter(intent => intent.action === 'event.emit'
+      && intent.name !== undefined)
+    const eventEmitListener = eventEmit$.addListener({
+      next: (intent: EventEmitIntent) => {
+        logAction(intent.action, intent.name)
+        client.event.emit(intent.name, intent.data)
+      }
+    })
+
+    const eventListen$ = action$.filter(intent => intent.action === 'event.listen'
+      && (<EventListenIntent>intent).pattern !== undefined)
+    const eventListenListener = eventListen$.addListener({
+      next: (intent: EventListenIntent) => {
+        logAction(intent.action, intent.pattern)
+        client.event.listen(intent.pattern, (match, isSubscribed, response) => {
+          if (isSubscribed) {
+            response.accept()
+            emit({ event: 'event.listen', match }, intent.scope)
+          }
+        })
+      },
+      error: noop,
+      complete: noop
+    })
+
+    const eventUnlisten$ = action$.filter(intent => intent.action === 'event.unlisten'
+      && (<EventListenIntent>intent).pattern !== undefined)
+    const eventUnlistenListener = eventUnlisten$.addListener({
+      next: (intent: EventListenIntent) => {
+        logAction(intent.action, intent.pattern)
+        client.event.unlisten(intent.pattern)
       },
       error: noop,
       complete: noop
