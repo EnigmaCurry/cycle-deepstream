@@ -66,7 +66,7 @@
   },
   "dependencies": {
     "@cycle/run": "^3.0.0",
-    "deepstream.io-client-js": "github:deepstreamio/deepstream.io-client-js",
+    "deepstream.io-client-js": "^2.1.4",
     "events": "^1.1.1",
     "json-stringify-safe": "^5.0.1",
     "xstream": "^10.5.0"
