@@ -8,7 +8,7 @@ cycle-deepstream
 
 A [Cycle.js](https://cycle.js.org/) driver for [deepstream.io](https://deepstream.io).
 
-Allows realtime communication between multiple clients and a centralized server. A self-hosted firebase replacement.
+Allows realtime communication between multiple clients and your cluster of deepstream servers. A self-hosted firebase replacement.
 
 ![giphy](https://cloud.githubusercontent.com/assets/43061/23532850/f8351d38-ff7b-11e6-9645-905309d7ee05.gif)
 
