@@ -6,7 +6,7 @@
     "clean": "rimraf dist",
     "dist": "npm run clean && NODE_ENV=production webpack",
     "deepstream": "deepstream start -c deepstream/config.yml",
-    "serve": "webpack-dev-server --host 0.0.0.0 --open",
+    "serve": "webpack-dev-server --host 127.0.0.1 --open",
     "rpcserver": "ts-node server/rpcserver.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "bower install",

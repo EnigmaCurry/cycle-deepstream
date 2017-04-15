@@ -12,7 +12,7 @@ logLevel: INFO
 # port for the websocket server
 port: 6020
 # host for the websocket server
-host: 0.0.0.0
+host: 127.0.0.1
 # url path websocket connections connect to
 urlPath: /deepstream
 # url path for http health-checks, GET requests to this path will return 200 if deepstream is alive
