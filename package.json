@@ -7,7 +7,7 @@
   "scripts": {
     "dist": "rimraf dist && tsc -p src",
     "postinstall": "npm run dist",
-    "test": "NODE_ENV=test mocha --timeout 5000 --trace-warnings --compilers ts:ts-node/register src/**/*.spec.ts",
+    "test": "cd src && NODE_ENV=test mocha --timeout 5000 --trace-warnings --compilers ts:ts-node/register **/*.spec.ts",
     "test-watch": "npm run test -- -w",
     "coverage": "NODE_ENV=test nyc npm test",
     "coverage-reload": "reload -d coverage -b",
