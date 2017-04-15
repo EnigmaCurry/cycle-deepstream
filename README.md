@@ -34,8 +34,23 @@ Or run the advanced demo:
 Usage Notes
 -------------
 
-No formal docs exist for this yet. This driver implements most of the [deepstream API methods](https://deepstream.io/docs/client-js/client/). In Cycle.js you never use imperative calls (code with side-effects) directly, so cycle-deepstream wraps these calls into a driver with an API that uses [plain-javascript objects to define actions (actions.ts)](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/actions.ts). 
+No formal docs exist for this yet. This driver implements most of the [deepstream API methods](https://deepstream.io/docs/client-js/client/). In Cycle.js you never use imperative calls (code with side-effects) directly, so cycle-deepstream wraps these calls into a driver with an API that uses [plain-javascript objects to define actions (actions.ts)](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/actions.ts).
 
+For instance, calling record.subscribe just returns an object:
+
+    > actions.record.subscribe('some-record')
+    { action: 'record.subscribe',
+      name: 'some-record',
+      events: {},
+      scope: undefined }
+
+This action describes the appropriate deepstream API method to call and some additional arguments. In this case they are:
+
+ * action - the deepstream API method name
+ * name - the name of the deepstream record to subscribe to
+ * events - the names of the [record events](https://deepstream.io/docs/client-js/datasync-record/#events) that we wish to subscribe to. The default is to subscribe to all of them, eg: ```{'record.existing': true, 'record.change': true, 'record.discard': true, 'record.delete': true, 'record.error': true }```. 
+ * scope - this is a common argument to all of the methods, it specifies a particular ID to the request that is also applied to the response. This allows the client to know that, a particular event is due to their actions, if the scope ID matches the one they used in the request. If no scope is defined, a default scope is used that is shared amongst all other requests that also don't use a scope. This mostly affects record.discard, as this will only discard the subscription of the record with the same scope defined.
+ 
 There are [two examples](https://github.com/EnigmaCurry/cycle-deepstream/tree/master/examples) that show general usage. The [end-to-end test](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/index.spec.ts) show comprehensive usage. 
 
 Features
@@ -53,12 +68,6 @@ Deepstream API Implementation:
       - [x] logout
   - Records:
     - [x] record.subscribe
-       - Note: Only one subscription is supported per record, and no
-         paths or callbacks are supported. Because the record
-         subscription is broadcast to all driver listeners, only one
-         subscription is ever needed. Subsequent record.subscribe
-         requests for the same id are ignored unless you call
-         record.discard first.
        - once subscribed, will emit events:
          - [x] record.change
          - [x] record.discard
@@ -75,16 +84,10 @@ Deepstream API Implementation:
     
   - Lists:
     - [x] list.subscribe
-       - Note: Only one subscription is supported per list, and no
-         paths or callbacks are supported. Because the list
-         subscription is broadcast to all driver listeners, only one
-         subscription is ever needed. Subsequent list.subscribe
-         requests for the same id are ignored unless you call
-         list.discard first.
       - once subscribed, will emit events:
          - [x] list.change
          - [x] list.entry-existing
-           - This emits individual events for each existing entry, like list.entry-added.
+           - This emits individual events, like list.entry-added, but for each existing entry in the list.
            - Note, this is a driver level event, not a part of the Deepstream API.
          - [x] list.discard
          - [x] list.delete
