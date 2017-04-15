@@ -34,10 +34,11 @@ Or run the advanced demo:
 Usage Notes
 -------------
 
-No formal docs exist for this yet. This driver implements most of the [deepstream API methods](https://deepstream.io/docs/client-js/client/). In Cycle.js you never use imperative calls (code with side-effects) directly, so cycle-deepstream wraps these calls into a driver with an API that uses [plain-javascript objects to define actions (actions.ts)](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/actions.ts).
+No formal docs exist for this yet. This driver implements most of the [deepstream API methods](https://deepstream.io/docs/client-js/client/). In Cycle.js you never use imperative calls directly (code with side-effects), so cycle-deepstream wraps these calls into a driver with an API that uses [plain-javascript objects to define actions (actions.ts)](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/actions.ts).
 
-For instance, calling record.subscribe just returns an object:
+For instance, calling record.subscribe returns an object that just describes what action to perform:
 
+    > const actions = require('cycle-deepstream/dist/actions')
     > actions.record.subscribe('some-record')
     { action: 'record.subscribe',
       name: 'some-record',
@@ -49,8 +50,33 @@ This action describes the appropriate deepstream API method to call and some add
  * action - the deepstream API method name
  * name - the name of the deepstream record to subscribe to
  * events - the names of the [record events](https://deepstream.io/docs/client-js/datasync-record/#events) that we wish to subscribe to. The default is to subscribe to all of them, eg: ```{'record.existing': true, 'record.change': true, 'record.discard': true, 'record.delete': true, 'record.error': true }```. 
- * scope - this is a common argument to all of the methods, it specifies a particular ID to the request that is also applied to the response. This allows the client to know that, a particular event is due to their actions, if the scope ID matches the one they used in the request. If no scope is defined, a default scope is used that is shared amongst all other requests that also don't use a scope. This mostly affects record.discard, as this will only discard the subscription of the record with the same scope defined.
- 
+ * scope - this is a common argument to all of the methods, it specifies a particular ID to the request that is also applied to the response. This allows your code to know whether a particular event is due to your actions by filtering the event stream on this same ID. If no scope is defined, a default scope is used that is shared amongst all other requests that also don't use a scope. This mostly affects record.discard, as this will only discard the subscription of the record with the same scope defined.
+
+This plain object is sent to the driver in it's input stream and processed by the driver asynchronously. When a deepstream event comes from the server, the driver passes this information to the output stream and back into your cycle application. Events of this sort look like this:
+
+    { event: 'record.change',
+      name: 'some-record',
+      data: {
+        foo: 'bar'
+      },
+      scope: undefined }
+
+This event is the first response to our subscribe action above, consisting of the data of the existing content of the 'some-record' object in deepstream's database. Subseqent events would be more 'record.change' events or possibly 'record.delete' etc.
+
+There's a helper function to apply scopes to actions:
+
+    > const actions = require('cycle-deepstream/dist/actions')
+    > const scope = actions.scope()
+    > scope(actions.record.get('some-record'))
+    { action: 'record.get',
+      name: 'some-record',
+      scope: 'j1jlj39z5ue7chjjdi4g' }    /* A randomly generated scope ID */
+    > scope.scope   /* The scope ID is available on the object, even though it's a function */
+    'j1jlj39z5ue7chjjdi4g'
+
+
+The events you receive for the record will now have the scope `j1jlj39z5ue7chjjdi4g` applied to them so that you can filter on it in your own code.
+
 There are [two examples](https://github.com/EnigmaCurry/cycle-deepstream/tree/master/examples) that show general usage. The [end-to-end test](https://github.com/EnigmaCurry/cycle-deepstream/blob/master/src/index.spec.ts) show comprehensive usage. 
 
 Features
