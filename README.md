@@ -6,7 +6,9 @@ cycle-deepstream
 [![Coverage Status](https://coveralls.io/repos/github/EnigmaCurry/cycle-deepstream/badge.svg?branch=master)](https://coveralls.io/github/EnigmaCurry/cycle-deepstream?branch=master)
 [![Join the chat at https://gitter.im/EnigmaCurry/cycle-deepstream](https://badges.gitter.im/EnigmaCurry/cycle-deepstream.svg)](https://gitter.im/EnigmaCurry/cycle-deepstream?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-A [Cycle.js](https://cycle.js.org/) driver for [deepstream.io](https://deepstream.io) - Allows realtime communication between multiple clients and a centralized server. A self-hosted firebase replacement.
+A [Cycle.js](https://cycle.js.org/) driver for [deepstream.io](https://deepstream.io).
+
+Allows realtime communication between multiple clients and a centralized server. A self-hosted firebase replacement.
 
 ![giphy](https://cloud.githubusercontent.com/assets/43061/23532850/f8351d38-ff7b-11e6-9645-905309d7ee05.gif)
 
