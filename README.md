@@ -2,7 +2,7 @@ cycle-deepstream
 =====================
 
 [![Build Status](https://travis-ci.org/EnigmaCurry/cycle-deepstream.svg?branch=master)](https://travis-ci.org/EnigmaCurry/cycle-deepstream)
-[![npm version](https://img.shields.io/npm/v/cycle-deepstream.svg?maxAge=86400)]
+[![npm version](https://img.shields.io/npm/v/cycle-deepstream.svg?maxAge=86400)](https://www.npmjs.com/package/cycle-deepstream)
 [![Coverage Status](https://coveralls.io/repos/github/EnigmaCurry/cycle-deepstream/badge.svg?branch=master)](https://coveralls.io/github/EnigmaCurry/cycle-deepstream?branch=master)
 [![Join the chat at https://gitter.im/EnigmaCurry/cycle-deepstream](https://badges.gitter.im/EnigmaCurry/cycle-deepstream.svg)](https://gitter.im/EnigmaCurry/cycle-deepstream?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
