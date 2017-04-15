@@ -6,17 +6,17 @@
       "es2016",
       "dom"
     ],
-    "outDir": "dist",
+    "outDir": "../dist",
     "noImplicitAny": true,
+    "noImplicitThis": true,
     "sourceMap": true,
+    "noImplicitReturns": true,
     "declaration": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"],
   "types": ["node","mocha","chai"],
   "typeRoots": [
-    "./node_modules/@types",
-    "./node_modules/@types/mocha/index.d.ts",
-    "./node_modules/deepstream.io-client-js/src/client.d.ts"
+    "../node_modules/@types",
+    "../node_modules/@types/mocha/index.d.ts",
+    "../node_modules/deepstream.io-client-js/src/client.d.ts"
   ]
 }

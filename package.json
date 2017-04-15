@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "dist": "rimraf dist && webpack",
+    "dist": "rimraf dist && tsc -p src",
     "postinstall": "npm run dist",
     "test": "NODE_ENV=test mocha --timeout 5000 --trace-warnings --compilers ts:ts-node/register src/**/*.spec.ts",
     "test-watch": "npm run test -- -w",

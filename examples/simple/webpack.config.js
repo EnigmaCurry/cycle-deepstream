@@ -13,6 +13,7 @@ module.exports = {
     compress: true,
     port: 3001
   },
+  devtool: 'source-map',
   plugins: [
     new CopyWebpackPlugin([
       { from: 'index.html' }
