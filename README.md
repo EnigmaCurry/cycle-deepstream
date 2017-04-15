@@ -2,12 +2,11 @@ cycle-deepstream
 =====================
 
 [![Build Status](https://travis-ci.org/EnigmaCurry/cycle-deepstream.svg?branch=master)](https://travis-ci.org/EnigmaCurry/cycle-deepstream)
+[![npm version](https://img.shields.io/npm/v/cycle-deepstream.svg?maxAge=86400)]
 [![Coverage Status](https://coveralls.io/repos/github/EnigmaCurry/cycle-deepstream/badge.svg?branch=master)](https://coveralls.io/github/EnigmaCurry/cycle-deepstream?branch=master)
 [![Join the chat at https://gitter.im/EnigmaCurry/cycle-deepstream](https://badges.gitter.im/EnigmaCurry/cycle-deepstream.svg)](https://gitter.im/EnigmaCurry/cycle-deepstream?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 A [Cycle.js](https://cycle.js.org/) driver for [deepstream.io](https://deepstream.io)
-
-Status: *experimental* - not released on npm yet.
 
 ![giphy](https://cloud.githubusercontent.com/assets/43061/23532850/f8351d38-ff7b-11e6-9645-905309d7ee05.gif)
 
@@ -108,7 +107,3 @@ Deepstream API Implementation:
     - [x] rpc.make
     - [ ] rpc.provide - I think this makes no sense to implement in cycle?
 
-TODO
------
-
- [ ] - Testing... lol.
