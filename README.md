@@ -38,7 +38,7 @@ No formal docs exist for this yet. This driver implements most of the [deepstrea
 
 For instance, calling record.subscribe returns an object that just describes what action to perform:
 
-    > const actions = require('cycle-deepstream/dist/actions')
+    > const {actions} = require('cycle-deepstream')
     > actions.record.subscribe('some-record')
     { action: 'record.subscribe',
       name: 'some-record',
@@ -65,7 +65,7 @@ This event is the first response to our subscribe action above, consisting of th
 
 There's a helper function to apply scopes to actions:
 
-    > const actions = require('cycle-deepstream/dist/actions')
+    > const {actions} = require('cycle-deepstream')
     > const scope = actions.scope()
     > scope(actions.record.get('some-record'))
     { action: 'record.get',

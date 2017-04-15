@@ -11,6 +11,8 @@ import {
   RPCIntent, CycleDeepstream, Event
 } from './types'
 
+export const actions = require('./actions')
+
 const stringify = require('json-stringify-safe')
 
 export function makeDeepstreamDriver({url, options = {}, debug = false}:
