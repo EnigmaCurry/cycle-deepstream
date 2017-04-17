@@ -1,7 +1,6 @@
 import xs, { Stream } from 'xstream'
 import sampleCombine from 'xstream/extra/sampleCombine'
 import { VNode, h } from '@cycle/dom'
-import isolate from '@cycle/isolate'
 import Collection from '@cycle/collection'
 import { Sources, Sinks } from '../types'
 import * as Markdown from 'markdown-it'
@@ -10,11 +9,20 @@ import * as uuid4 from 'uuid/v4'
 import _ from 'lodash'
 
 import * as ds from '../../../../src/actions'
+import { userImages } from '../images'
 
 const markdown = new Markdown()
 
+const avatars = {
+  john: require('file-loader!../../images/john.jpg'),
+  paul: require('file-loader!../../images/paul.jpg'),
+  george: require('file-loader!../../images/george.jpg'),
+  ringo: require('file-loader!../../images/ringo.jpg')
+}
+
 type Post = {
   name: string,
+  author: string,
   parent: string,
   root: string,
   title: string | null,
@@ -34,7 +42,10 @@ function view(postId, post: Post, children, showReplyBox = false) {
     const rootClass = post.root === post.name ? '.root' : ''
     return h(`paper-card.post${alternateLineClass}${rootClass}`, { key: uuid4() }, [
       h(`div.card-content.post#post-${postId}`, [
-        h('div.post-title', post.title ? post.title : '[no title]'),
+        h('div.post-header', [
+          h('div.post-avatar', h('img', { attrs: { src: userImages[post.author] } })),
+          h('div.post-title', post.title ? post.title : '[no title]')
+        ]),
         toVNode(content),
         h('ul.post-footer', [
           h('li', h(`paper-icon-button#star-${postId}`, { attrs: { icon: 'star' } })),
@@ -100,10 +111,10 @@ export function Post(sources: Sources): Sinks {
     .map(([props, effect]) => effect)
 
   // Create stream of props for new child posts added:
-  const childProps$ = children$
-    .filter(effect => effect.event === 'list.entry-existing' ||
+  const childProps$ = xs.combine(props$, children$)
+    .filter(([props, effect]) => effect.event === 'list.entry-existing' ||
       effect.event === 'list.entry-added')
-    .map(effect => ({ props$: xs.of({ id: effect.entry, expandChildren: 1 }) }))
+    .map(([props, effect]) => ({ props$: xs.of({ id: effect.entry, expandChildren: 1, userData: props.userData }) }))
 
   // Create stream of remove events for a particular child post:
   const getChildRemoveStream = (recordName$) => xs.combine(children$, recordName$)
@@ -131,9 +142,10 @@ export function Post(sources: Sources): Sinks {
       .map(ev => (<Element>event.target).parentElement.querySelector('textarea').value))
     .flatten()
 
-  const submitReply$ = xs.combine(post$, replyText$)
-    .map(([parent, replyText]) => {
+  const submitReply$ = xs.combine(props$, post$, replyText$)
+    .map(([props, parent, replyText]) => {
       return ds.rpc.make('create-post', {
+        author: props.userData.userid,
         parent: parent.name,
         root: parent.root,
         title: null,

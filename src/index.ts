@@ -8,7 +8,7 @@ import {
   Intent, LoginIntent, SubscribeIntent,
   RecordSetIntent, ListSetIntent, ListenIntent,
   ListEntryIntent, EventEmitIntent, EventListenIntent,
-  RPCIntent, CycleDeepstream, Event
+  RPCIntent, CycleDeepstream, Event, Source
 } from './types'
 
 export const actions = require('./actions')
@@ -30,7 +30,7 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
     const driverEvents = new EventEmitter()
 
     // The stream of events we will return from this driver:
-    const response$: Stream<Event> = fromEvent(driverEvents, 'deepstream-event')
+    const response$: Source = fromEvent(driverEvents, 'deepstream-event')
     // Log the events that the output stream sees
     // This also ensures that the stream is created now, and ensures
     // emitted events have a valid listener.

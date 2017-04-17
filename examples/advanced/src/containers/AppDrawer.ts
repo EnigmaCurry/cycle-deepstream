@@ -2,15 +2,9 @@ import xs from 'xstream'
 import { h, div, br, span, a, button, input } from '@cycle/dom'
 import * as deepstream from '../actions/deepstream'
 import { Sources, Sinks } from '../types'
+import { userImages } from '../images'
 
 import '../../styles/AppDrawer.scss'
-
-const userImages = {
-  john: require('file-loader!../../images/john.jpg'),
-  paul: require('file-loader!../../images/paul.jpg'),
-  george: require('file-loader!../../images/george.jpg'),
-  ringo: require('file-loader!../../images/ringo.jpg')
-}
 
 function view(userData = null) {
   const hooks = {

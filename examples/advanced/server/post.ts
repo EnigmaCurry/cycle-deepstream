@@ -1,6 +1,8 @@
 import { getRecord, getList, RPC } from './deepstream_util'
 
 type Post = {
+  // The post author
+  author: string,
   //The parent post
   parent: string,
   //The top most post on the page, if null the record name will be
@@ -47,6 +49,7 @@ export const createPost: RPC = {
               record.set(<any>{
                 root: post.root || record.name,
                 parent: parent.name,
+                author: post.author,
                 title: post.title,
                 content: post.content,
                 depth: typeof parent.get('depth') !== 'number' ? 0 : parent.get('depth') + 1

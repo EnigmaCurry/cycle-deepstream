@@ -4,11 +4,7 @@ import * as navigation from '../actions/navigation'
 import * as ds from '../actions/deepstream'
 import { div, h1, br, img } from '@cycle/dom'
 import { Location } from 'history'
-
-const john = require('file-loader!../../images/john.jpg')
-const paul = require('file-loader!../../images/paul.jpg')
-const george = require('file-loader!../../images/george.jpg')
-const ringo = require('file-loader!../../images/ringo.jpg')
+import { userImages } from '../images'
 
 function view() {
   const width = 150
@@ -31,11 +27,11 @@ function view() {
     div('.login', { style: { width: "100%", margin: "0 auto", textAlign: "center" } },
       [
         h1("Click your favorite Beatle to sign in:"),
-        userImg('john', john),
-        userImg('paul', paul),
+        userImg('john', userImages.john),
+        userImg('paul', userImages.paul),
         br(),
-        userImg('george', george),
-        userImg('ringo', ringo)
+        userImg('george', userImages.george),
+        userImg('ringo', userImages.ringo)
       ])
   )
 }

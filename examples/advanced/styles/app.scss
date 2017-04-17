@@ -24,6 +24,22 @@ paper-card.post {
 .post .post-title {
     font-size: 1.5em;
 }
+.post .content {
+    overflow: auto;
+}
+.post-header {
+    overflow:auto;
+}
+.post-children .post-header {
+    overflow: initial;
+}
+.post-avatar {
+    float: left;
+    margin-right: 0.5em;
+}
+.post-avatar img {
+    width: 45px;
+}
 paper-card.post.root {
 }
 paper-card.post.odd {
@@ -55,9 +71,8 @@ paper-card.post textarea {
 }
 
 ul.post-footer {
-    margin-left: 0;
+    margin: 0;
     padding-left: 0;
-    margin-bottom:0;
 }
 
 .post-footer li {

@@ -66,7 +66,7 @@ This event is the first response to our subscribe action above, consisting of th
 There's a helper function to apply scopes to actions:
 
     > const {actions} = require('cycle-deepstream')
-    > const scope = actions.scope()
+    > const scope = actions.scope()    /* This returns a function, a 'scope applier' */
     > scope(actions.record.get('some-record'))
     { action: 'record.get',
       name: 'some-record',

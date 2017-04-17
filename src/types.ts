@@ -63,7 +63,11 @@ export type Event = {
   isLoggedIn?: boolean
 }
 
-export type CycleDeepstream = Driver<Stream<Intent>, Stream<Event>>
+export type Source = Stream<Event>
+
+export type Sink = Stream<Intent>
+
+export type CycleDeepstream = Driver<Sink, Source>
 
 export interface ScopeFunction extends Function {
   scope?: string

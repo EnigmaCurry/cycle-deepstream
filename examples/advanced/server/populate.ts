@@ -6,7 +6,8 @@ export function populate(client: deepstreamIO.Client) {
     setAsync(main, {
       root: main.name,
       title: 'From me to You',
-      content: ' * one\n * two\n * three\n',
+      author: 'paul',
+      content: "If there's anything that you want..",
       depth: 0
     })
   })

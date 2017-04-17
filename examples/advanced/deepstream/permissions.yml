@@ -14,6 +14,9 @@ event:
     subscribe: true
     listen: false
 rpc:
+  "create-post":
+    request: "data.author === user.id"
+    
   "*":
     provide: "user.data.role === 'admin'"
     request: true
