@@ -297,8 +297,8 @@ export function makeDeepstreamDriver({url, options = {}, debug = false}:
         client.record.listen(intent.pattern, (match, isSubscribed, response) => {
           if (isSubscribed) {
             response.accept()
-            emit({ event: 'record.listen', match, isSubscribed }, intent.scope)
           }
+          emit({ event: 'record.listen', match, isSubscribed }, intent.scope)
         })
       },
       error: noop,

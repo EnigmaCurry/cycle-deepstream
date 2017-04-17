@@ -212,13 +212,18 @@ describe('cycle-deepstream', () => {
   it('must respond to record listening', next => {
     const recordListen$ = deep$
       .filter(evt => evt.event === 'record.listen')
-      .take(1)
-    expectStreamValues(recordListen$, [{ event: 'record.listen', match: 'listen1', isSubscribed: true }])
+      .take(2)
+    expectStreamValues(recordListen$, [
+      { event: 'record.listen', match: 'listen1', isSubscribed: true },
+      { event: 'record.listen', match: 'listen1', isSubscribed: false }
+    ])
       .then(next)
       .catch(next)
     emitAction(actions.record.listen('listen1'))
     // Get the record with the other client, to trigger the listen callback:
-    client.record.getRecord('listen1')
+    client.record.getRecord('listen1').whenReady(record => {
+      record.discard()
+    })
   })
   ////////////////////////////////////////
   // Logout / Re-Login
