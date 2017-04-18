@@ -13,13 +13,6 @@ import { userImages } from '../images'
 
 const markdown = new Markdown()
 
-const avatars = {
-  john: require('file-loader!../../images/john.jpg'),
-  paul: require('file-loader!../../images/paul.jpg'),
-  george: require('file-loader!../../images/george.jpg'),
-  ringo: require('file-loader!../../images/ringo.jpg')
-}
-
 type Post = {
   name: string,
   author: string,
@@ -30,7 +23,7 @@ type Post = {
   depth: number
 }
 
-function view(postId, post: Post, children, showReplyBox = false) {
+function view(postId, post: Post, children, currentUser: { userid: string, name: string }, showReplyBox = false) {
   //Manually create a DOM element and corece it into a snabbdom VNode:
   const content = document.createElement('div.content')
   //Render post content from markdown to HTML:
@@ -52,6 +45,7 @@ function view(postId, post: Post, children, showReplyBox = false) {
           h('li', h(`paper-icon-button#reply-${postId}`, { attrs: { icon: 'reply' } }))
         ]),
         h('div.replybox', { style: { display: showReplyBox ? 'block' : 'none' } }, [
+          h('div.post-avatar', h('img', { attrs: { src: userImages[currentUser.userid] } })),
           h(`iron-autogrow-textarea#replybox-${postId}.textbox`, {
             attrs: { rows: 4, placeholder: 'Reply with your markdown formatted comment here' }, hook: {
               //Autofocus the textarea:
@@ -154,7 +148,7 @@ export function Post(sources: Sources): Sinks {
     })
 
   const vdom$ = xs.combine(props$, post$, childPostsVdom$, showReplyBox$)
-    .map(([props, post, childrenDOM, showReplyBox]) => view(props.domID, post, childrenDOM, showReplyBox))
+    .map(([props, post, childrenDOM, showReplyBox]) => view(props.domID, post, childrenDOM, props.userData, showReplyBox))
 
   const childRequest$ = childPosts$
     .map(postList => xs.merge.apply(null, postList.map(post => post.deep$)))

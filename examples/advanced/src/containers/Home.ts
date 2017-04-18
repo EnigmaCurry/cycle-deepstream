@@ -13,7 +13,6 @@ export function Home(sources: Sources): Sinks {
 
   // Rerender the post listing when a user logs in:
   const postListing$ = user$
-    .debug('user')
     .filter(userData => userData !== null)
     .map(userData => isolate(Post)(
       { ...sources, props$: xs.of({ id: 'p/main/sticky', expandChildren: 1, userData }) }))
