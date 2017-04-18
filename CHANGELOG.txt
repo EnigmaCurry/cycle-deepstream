@@ -1,3 +1,6 @@
+1.0.4
+ - Adds record.listen and event.listen events for unsubscribe
+
 1.0.3
  - Exports actions from the root of the library
    eg: const {actions} = require('cycle-deepstream')
