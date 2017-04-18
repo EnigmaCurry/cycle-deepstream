@@ -400,14 +400,18 @@ describe('cycle-deepstream', () => {
   it('must listen and unlisten to event subscriptions', next => {
     const listen$ = deep$
       .filter(evt => evt.event === 'event.listen')
-      .take(1)
+      .take(2)
     expectStreamValues(listen$, [
-      { event: 'event.listen', match: 'test-event2' }
+      { event: 'event.listen', match: 'test-event2', isSubscribed: true },
+      { event: 'event.listen', match: 'test-event2', isSubscribed: false }
     ]).then(() => {
       emitAction(actions.event.unlisten('test-event2'))
       next()
     }).catch(next)
     emitAction(actions.event.listen('test-event2'))
+    setTimeout(() => {
+      client.event.unsubscribe('test-event2', undefined)
+    }, 300)
   })
 
   ////////////////////////////////////////
