@@ -10,10 +10,10 @@ A [Cycle.js](https://cycle.js.org/) driver for the [deepstream.io](https://deeps
 
 Allows realtime communication between multiple clients and your cluster of deepstream servers. A self-hosted firebase replacement.
 
-![giphy](https://cloud.githubusercontent.com/assets/43061/23532850/f8351d38-ff7b-11e6-9645-905309d7ee05.gif)
+![simple example](https://cloud.githubusercontent.com/assets/43061/23532850/f8351d38-ff7b-11e6-9645-905309d7ee05.gif)
+![advanced example](https://cloud.githubusercontent.com/assets/43061/25155996/0e173f0a-2466-11e7-8b5f-e7945295b61f.gif)
 
-*(above: The simple example running in three browser windows)*
-
+*(above: the simple example running in three browser windows, and the advanced example simulating two mobile devices.)*
 
 Run Demo
 ----------
