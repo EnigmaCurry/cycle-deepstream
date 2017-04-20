@@ -9,7 +9,11 @@
     "suppressImplicitAnyIndexErrors": true,
     "module": "commonjs",
     "target": "ES5",
-    "outDir": "dist/"
+    "outDir": "dist/",
+    "lib": [
+      "es2016",
+      "dom"
+    ]
   },
   "formatCodeOptions": {
     "indentSize": 2,

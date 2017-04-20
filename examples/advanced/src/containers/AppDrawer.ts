@@ -1,6 +1,6 @@
 import xs from 'xstream'
 import { h, div, br, span, a, button, input } from '@cycle/dom'
-import * as deepstream from '../actions/deepstream'
+import { actions as deepstream } from 'cycle-deepstream'
 import { Sources, Sinks } from '../types'
 import { userImages } from '../images'
 

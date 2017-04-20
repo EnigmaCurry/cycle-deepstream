@@ -1,7 +1,7 @@
 import xs from 'xstream'
 import { Sources, Sinks } from '../types'
 import * as navigation from '../actions/navigation'
-import * as ds from '../actions/deepstream'
+import { actions as ds } from 'cycle-deepstream'
 import { div, h1, br, img } from '@cycle/dom'
 import { Location } from 'history'
 import { userImages } from '../images'

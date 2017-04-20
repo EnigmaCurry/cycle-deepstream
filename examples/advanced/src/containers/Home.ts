@@ -2,11 +2,11 @@ import xs, { Stream } from 'xstream'
 import { VNode, h, div, br, span, a, button, input } from '@cycle/dom'
 import { PushHistoryInput } from '@cycle/history/lib'
 import isolate from '@cycle/isolate'
-import * as deepstream from '../actions/deepstream'
+import { Intent as DSIntent } from 'cycle-deepstream/dist/types'
+import { actions as deepstream } from 'cycle-deepstream'
 import { Location } from 'history'
 import { Sources, Sinks } from '../types'
 import { Post } from '../containers'
-import { Intent as DSIntent } from '../../../../src/types'
 
 export function Home(sources: Sources): Sinks {
   const { DOM, history$, deep$, user$ } = sources

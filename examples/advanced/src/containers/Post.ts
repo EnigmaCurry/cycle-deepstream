@@ -8,7 +8,7 @@ import { toVNode } from 'snabbdom/tovnode'
 import * as uuid4 from 'uuid/v4'
 import _ from 'lodash'
 
-import * as ds from '../../../../src/actions'
+import { actions as ds } from 'cycle-deepstream'
 import { userImages } from '../images'
 
 const markdown = new Markdown()
