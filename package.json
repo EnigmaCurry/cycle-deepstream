@@ -6,6 +6,7 @@
   "typings": "dist/index.d.ts",
   "scripts": {
     "dist": "rimraf dist && tsc -p src",
+    "prepublish": "npm run dist",
     "postinstall": "npm run dist",
     "test": "cd src && NODE_ENV=test mocha --timeout 5000 --trace-warnings --compilers ts:ts-node/register **/*.spec.ts",
     "test-watch": "npm run test -- -w",
