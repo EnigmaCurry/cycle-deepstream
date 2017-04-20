@@ -3,3 +3,4 @@ bower_components
 .tern-port
 .nyc_output
 coverage
+examples/*/dist

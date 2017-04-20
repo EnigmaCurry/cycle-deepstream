@@ -451,7 +451,7 @@ function makeDeepstreamDriver({ url, options = {}, debug = false }) {
         const eventListenListener = eventListen$.addListener({
             next: (intent) => {
                 logAction(intent.action, intent.pattern);
-                clients.event.listen(intent.pattern, (match, isSubscribed, response) => {
+                client.event.listen(intent.pattern, (match, isSubscribed, response) => {
                     if (isSubscribed) {
                         response.accept();
                     }
