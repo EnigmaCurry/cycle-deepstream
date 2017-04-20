@@ -1,3 +1,6 @@
+1.0.6
+ - Fixed release of the same as 1.0.5
+ 
 1.0.5
  - Ensures dist is done prior to publish, and included in the package.
  
