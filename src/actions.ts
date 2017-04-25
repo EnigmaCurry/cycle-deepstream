@@ -23,13 +23,13 @@ export const record = {
 }
 
 export const list = {
-  subscribe: (list: string, events = {}, scope?: string) => ({ action: 'list.subscribe', name: list, events }),
-  getEntries: (list: string, scope?: string) => ({ action: 'list.getEntries', name: list }),
-  setEntries: (list: string, entries: Array<any>, scope?: string) => ({ action: 'list.setEntries', name: list, entries }),
-  addEntry: (list: string, entry: string, index?: number, scope?: string) => ({ action: 'list.addEntry', name: list, entry, index }),
-  removeEntry: (list: string, entry: string, scope?: string) => ({ action: 'list.removeEntry', name: list, entry }),
-  discard: (list: string, scope?: string) => ({ action: 'list.discard', name: list }),
-  delete: (list: string, scope?: string) => ({ action: 'list.delete', name: list })
+  subscribe: (list: string, events = {}, scope?: string) => ({ action: 'list.subscribe', name: list, events, scope }),
+  getEntries: (list: string, scope?: string) => ({ action: 'list.getEntries', name: list, scope }),
+  setEntries: (list: string, entries: Array<any>, scope?: string) => ({ action: 'list.setEntries', name: list, entries, scope }),
+  addEntry: (list: string, entry: string, index?: number, scope?: string) => ({ action: 'list.addEntry', name: list, entry, index, scope }),
+  removeEntry: (list: string, entry: string, scope?: string) => ({ action: 'list.removeEntry', name: list, entry, scope }),
+  discard: (list: string, scope?: string) => ({ action: 'list.discard', name: list, scope }),
+  delete: (list: string, scope?: string) => ({ action: 'list.delete', name: list, scope })
 }
 
 export const rpc = {

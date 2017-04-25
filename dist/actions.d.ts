@@ -59,34 +59,41 @@ export declare const list: {
         action: string;
         name: string;
         events: {};
+        scope: string;
     };
     getEntries: (list: string, scope?: string) => {
         action: string;
         name: string;
+        scope: string;
     };
     setEntries: (list: string, entries: any[], scope?: string) => {
         action: string;
         name: string;
         entries: any[];
+        scope: string;
     };
     addEntry: (list: string, entry: string, index?: number, scope?: string) => {
         action: string;
         name: string;
         entry: string;
         index: number;
+        scope: string;
     };
     removeEntry: (list: string, entry: string, scope?: string) => {
         action: string;
         name: string;
         entry: string;
+        scope: string;
     };
     discard: (list: string, scope?: string) => {
         action: string;
         name: string;
+        scope: string;
     };
     delete: (list: string, scope?: string) => {
         action: string;
         name: string;
+        scope: string;
     };
 };
 export declare const rpc: {

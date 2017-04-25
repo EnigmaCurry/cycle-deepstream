@@ -19,13 +19,13 @@ exports.record = {
     listen: (pattern, scope) => ({ action: 'record.listen', pattern, scope })
 };
 exports.list = {
-    subscribe: (list, events = {}, scope) => ({ action: 'list.subscribe', name: list, events }),
-    getEntries: (list, scope) => ({ action: 'list.getEntries', name: list }),
-    setEntries: (list, entries, scope) => ({ action: 'list.setEntries', name: list, entries }),
-    addEntry: (list, entry, index, scope) => ({ action: 'list.addEntry', name: list, entry, index }),
-    removeEntry: (list, entry, scope) => ({ action: 'list.removeEntry', name: list, entry }),
-    discard: (list, scope) => ({ action: 'list.discard', name: list }),
-    delete: (list, scope) => ({ action: 'list.delete', name: list })
+    subscribe: (list, events = {}, scope) => ({ action: 'list.subscribe', name: list, events, scope }),
+    getEntries: (list, scope) => ({ action: 'list.getEntries', name: list, scope }),
+    setEntries: (list, entries, scope) => ({ action: 'list.setEntries', name: list, entries, scope }),
+    addEntry: (list, entry, index, scope) => ({ action: 'list.addEntry', name: list, entry, index, scope }),
+    removeEntry: (list, entry, scope) => ({ action: 'list.removeEntry', name: list, entry, scope }),
+    discard: (list, scope) => ({ action: 'list.discard', name: list, scope }),
+    delete: (list, scope) => ({ action: 'list.delete', name: list, scope })
 };
 exports.rpc = {
     make: (method, data, scope) => ({ action: 'rpc.make', method: method, data, scope })
